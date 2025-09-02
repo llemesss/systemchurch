@@ -169,5 +169,23 @@ export async function initDatabase() {
     }
   }
 
-  return db;
+  // Criar wrapper para compatibilidade com DatabaseAdapter
+  return {
+    get: async (sql: string, params: any[] = []) => {
+      return await db.get(sql, params);
+    },
+    all: async (sql: string, params: any[] = []) => {
+      return await db.all(sql, params);
+    },
+    run: async (sql: string, params: any[] = []) => {
+      const result = await db.run(sql, params);
+      return {
+        lastID: result.lastID,
+        changes: result.changes || 0
+      };
+    },
+    exec: async (sql: string) => {
+      await db.exec(sql);
+    }
+  };
 }

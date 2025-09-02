@@ -5,7 +5,7 @@ import { initPostgresDatabase } from './postgres';
 export interface DatabaseAdapter {
   get: (sql: string, params?: any[]) => Promise<any>;
   all: (sql: string, params?: any[]) => Promise<any[]>;
-  run: (sql: string, params?: any[]) => Promise<{ lastID?: any; changes: number }>;
+  run: (sql: string, params?: any[]) => Promise<{ lastID?: number; changes: number }>;
   exec: (sql: string) => Promise<void>;
 }
 

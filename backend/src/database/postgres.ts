@@ -15,7 +15,7 @@ export async function initPostgresDatabase() {
       get: async (sql: string, params: any[] = []) => {
         try {
           const result = await pool.query(sql, params);
-          return result.rows[0];
+          return result.rows[0] || null;
         } catch (error) {
           console.error('Erro na query GET:', error);
           throw error;
@@ -35,9 +35,15 @@ export async function initPostgresDatabase() {
       run: async (sql: string, params: any[] = []) => {
         try {
           const result = await pool.query(sql, params);
+          // Para INSERT com RETURNING, pegar o ID retornado
+          // Para outros comandos, usar rowCount
+          const lastID: number | undefined = result.rows && result.rows.length > 0 && result.rows[0].id 
+            ? Number(result.rows[0].id) 
+            : undefined;
+          
           return { 
-            lastID: result.rows[0]?.id, 
-            changes: result.rowCount || 0 
+            lastID, 
+            changes: Number(result.rowCount) || 0 
           };
         } catch (error) {
           console.error('Erro na query RUN:', error);
