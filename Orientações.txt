@@ -1,0 +1,78 @@
+Ótimo, vamos mergulhar nisso. Sua ideia é excelente e é exatamente o tipo de funcionalidade que transforma um site simples em uma ferramenta de gestão para a igreja. Estruturar isso corretamente desde o início é fundamental.
+
+O que você está descrevendo é um **sistema de gerenciamento de células com diferentes níveis de permissão**. Vou te ajudar a organizar esse pensamento em um plano claro e estruturado, que você pode depois passar para a IA desenvolver.
+
+Vamos dividir o plano em 3 Fases, baseadas nos papéis que você descreveu: **Pastor (Admin)**, **Membro** e **Líder de Célula**.
+
+---
+
+### **Plano de Ação: Sistema de Gerenciamento de Células**
+
+#### **Fase 1: O Painel do Pastor (Nível Administrador)**
+
+O Pastor é a base de todo o sistema. Ele precisa de uma área administrativa segura para configurar as células e os líderes.
+
+1.  **Acesso do Pastor:**
+    * O login do pastor deve dar acesso a um painel de controle especial com opções que só ele vê.
+
+2.  **Nova Seção: "Gerenciar Células e Líderes"**
+    * Dentro do painel do pastor, deve haver uma nova área com este nome. Nela, ele poderá:
+
+3.  **Funcionalidade "Criar Nova Célula / Cadastrar Líderes":**
+    * Um formulário com os seguintes campos:
+        * **Número da Célula:** Um campo de texto para o número (ex: "05", "12"). **Este é o número que aparecerá no menu para os membros escolherem.**
+        * **Nome do Líder 1:** Campo de texto.
+        * **Email do Líder 1:** Campo de email. **(Este será o login do líder)**.
+        * **Senha para o Líder 1:** Campo de senha para o pastor definir a senha inicial do líder.
+        * **[Checkbox] Adicionar 2º Líder?** Uma caixa de seleção opcional. Se marcada, exibe os campos abaixo:
+            * **Nome do Líder 2:** Campo de texto.
+            * **Email do Líder 2:** Campo de email.
+            * **Senha para o Líder 2:** Campo de senha.
+
+4.  **Funcionalidade "Visualizar Células Cadastradas":**
+    * Uma tabela ou lista que mostra todas as células criadas, com o número, nome dos líderes e a opção de **Editar** ou **Excluir** cada célula.
+
+#### **Fase 2: O Cadastro do Membro (Visão Pública)**
+
+Esta é a parte que o novo membro verá ao entrar no site para se cadastrar.
+
+1.  **Página de Cadastro de Membros:**
+    * Um formulário de registro público e de fácil acesso.
+
+2.  **Campos do Formulário:**
+    * **Informações Pessoais:** `Nome Completo`, `Data de Nascimento`, `Telefone/WhatsApp`, `Endereço`, etc.
+    * **Informações de Login:** `E-mail` e `Senha` (o próprio membro cria sua senha aqui).
+    * **O Ponto-Chave: "Escolha sua Célula":**
+        * Um **menu suspenso (dropdown)**.
+        * As opções neste menu **serão preenchidas automaticamente** com os "Números de Célula" que o pastor cadastrou na Fase 1.
+    * **Campo Opcional "Meu Oikós":**
+        * Um campo de texto com o título "Nome do seu Oikós (opcional)", onde o membro pode escrever o nome da pessoa que ele quer alcançar.
+
+#### **Fase 3: O Painel do Líder de Célula (Acesso Restrito)**
+
+Esta é a visão que o líder terá após o pastor criar seu acesso.
+
+1.  **Acesso do Líder:**
+    * O líder faz login na "Área de Membros" usando o e-mail e a senha que o pastor definiu para ele.
+    * O sistema precisa reconhecer que aquele e-mail pertence a um líder e mostrar uma dashboard diferente da de um membro comum.
+
+2.  **Dashboard do Líder:**
+    * A tela inicial do líder deve ser focada na sua célula.
+
+3.  **Funcionalidade Principal: "Membros da Minha Célula"**
+    * A dashboard deve exibir automaticamente uma **lista de todos os membros** que, durante o cadastro (Fase 2), selecionaram o número da célula daquele líder.
+    * **Informações na Lista:** Para cada membro, o líder deve conseguir ver as informações mais importantes, como:
+        * `Nome Completo`
+        * `Telefone`
+        * `Email`
+        * `Nome do Oikós` (o campo opcional que o membro preencheu).
+
+---
+
+**Resumo do Fluxo:**
+
+1.  **Pastor cadastra** a Célula 10 e os líderes João e Maria.
+2.  **O Membro Pedro** entra no site, vai em "Cadastre-se", preenche seus dados e, no dropdown, **seleciona a Célula 10**.
+3.  **João (Líder)** faz login com o acesso criado pelo pastor, e na sua dashboard, **o nome de Pedro aparece automaticamente** na lista de membros da sua célula.
+
+Essa é uma excelente estrutura inicial. Ela é organizada, define bem as responsabilidades de cada um e é "escalável", ou seja, pode crescer e receber mais funcionalidades no futuro (como registro de presença, relatórios, etc.).

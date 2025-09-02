@@ -1,0 +1,45 @@
+{
+  "name": "igreja-app-backend",
+  "version": "1.0.0",
+  "description": "Backend API para o sistema de gerenciamento da igreja",
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "nodemon src/server.ts",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "postbuild": "cp -r src/database dist/ || xcopy src\\database dist\\database /E /I /Y"
+  },
+  "keywords": [
+    "igreja",
+    "api",
+    "backend",
+    "express",
+    "sqlite"
+  ],
+  "author": "Igreja App",
+  "license": "MIT",
+  "dependencies": {
+    "@types/pg": "^8.15.5",
+    "@types/sqlite3": "^3.1.11",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.10.5",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
