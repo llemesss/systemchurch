@@ -263,7 +263,7 @@ const MeuPerfil: React.FC = () => {
 
   // Encontrar célula e líder do usuário
   const userCell = cells?.find(cell => cell.id === user?.cell_id);
-  const userLeader = leaders?.find(leader => leader.id === userCell?.leader_id);
+  const userLeader = leaders?.find(leader => leader.id === userCell?.leader_1_id);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
