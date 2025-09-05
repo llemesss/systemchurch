@@ -24,7 +24,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useWebSocket } from '../contexts/WebSocketContext';
 import ProtectedComponent from '../components/ProtectedComponent';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { UserManagementData, EditUserData, UserRole, Cell } from '../types/hierarchy';
+import type { UserManagementData, EditUserData, UserRole, Cell } from '../types/hierarchy';
 
 // Material-UI imports
 import {
@@ -40,10 +40,7 @@ import {
   TableRow,
   Chip,
   IconButton,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
+
   Box,
   Menu,
   MenuItem,
@@ -67,8 +64,7 @@ import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  People as PeopleIcon,
-  Navigation as NavigationIcon,
+
   Dashboard as DashboardIcon,
   Group as GroupIcon,
   Settings as SettingsIcon,
@@ -85,23 +81,18 @@ const PastorPanel: React.FC = () => {
     users,
     cells,
     supervisors,
-    coordinators,
     leaders,
     getAllUsers,
     createUser,
     updateUser,
     deleteUser,
-    resetUserPassword,
-    getAvailableCells,
-    getAvailableSupervisors,
     getAllCells,
     createCell,
     updateCell,
-    deleteCell,
-    getCellById
+    deleteCell
   } = useUserManagement();
 
-  const [allUsers, setAllUsers] = useState<UserManagementData[]>([]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUser, setEditingUser] = useState<UserManagementData | null>(null);
@@ -111,13 +102,8 @@ const PastorPanel: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedUserForRedirect, setSelectedUserForRedirect] = useState<UserManagementData | null>(null);
   const [redirectMenuAnchor, setRedirectMenuAnchor] = useState<null | HTMLElement>(null);
-  const [userPasswords, setUserPasswords] = useState<{[key: string]: string}>({});
-  const [resettingPassword, setResettingPassword] = useState<{[key: string]: boolean}>({});
-  const [showCreateChildForm, setShowCreateChildForm] = useState(false);
   const [selectedLeader, setSelectedLeader] = useState<UserManagementData | null>(null);
-  const [availableCells, setAvailableCells] = useState<Cell[]>([]);
-  const [selectedCells, setSelectedCells] = useState<string[]>([]);
-  const [selectedSupervisors, setSelectedSupervisors] = useState<string[]>([]);
+
   const [selectedCellForUser, setSelectedCellForUser] = useState<Cell | null>(null);
 
   const modalStyle = {
@@ -140,13 +126,7 @@ const PastorPanel: React.FC = () => {
     leader_id: undefined
   });
 
-  const [childFormData, setChildFormData] = useState({
-    name: '',
-    age: '',
-    parent_id: ''
-  });
 
-  const [showPasswords, setShowPasswords] = useState<{[key: string]: boolean}>({});
 
   // Estado para o formulário de usuário
   const [formData, setFormData] = useState<EditUserData & { password?: string; address?: string }>({
@@ -356,8 +336,7 @@ const PastorPanel: React.FC = () => {
     });
     setEditingUser(null);
     setSelectedCellForUser(null);
-    setSelectedCells([]);
-    setSelectedSupervisors([]);
+
   };
 
   const closeModal = () => {
@@ -384,8 +363,7 @@ const PastorPanel: React.FC = () => {
     });
     setEditingUser(null);
     setSelectedCellForUser(null);
-    setSelectedCells([]);
-    setSelectedSupervisors([]);
+
   };
 
   const handleCellSubmit = async (e: React.FormEvent) => {
@@ -873,71 +851,7 @@ const PastorPanel: React.FC = () => {
           </Modal>
         )}
 
-        {/* Modal de Criação de Criança */}
-        {showCreateChildForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Adicionar Criança</h2>
-                <button
-                  onClick={() => setShowCreateChildForm(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                // Implementar lógica de criação de criança
-                console.log('Criar criança:', childFormData);
-                setShowCreateChildForm(false);
-              }} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nome da Criança
-                  </label>
-                  <input
-                    type="text"
-                    value={childFormData.name}
-                    onChange={(e) => setChildFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Idade
-                  </label>
-                  <input
-                    type="number"
-                    value={childFormData.age}
-                    onChange={(e) => setChildFormData(prev => ({ ...prev, age: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div className="flex justify-end space-x-2 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateChildForm(false)}
-                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Adicionar
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+
 
         {/* Conteúdo Principal */}
         <div className="container mx-auto px-4 py-8">
