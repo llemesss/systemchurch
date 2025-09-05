@@ -1,23 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { 
   Users, 
   UserPlus, 
-  Edit, 
-  Trash2, 
-  Phone, 
-  Mail, 
-  ArrowLeft,
-  Save,
-  X,
-  CheckCircle,
-  AlertCircle,
-  Eye,
-  EyeOff,
   Plus,
-  Grid3X3,
-  Settings
+  Grid3X3
 } from 'lucide-react';
 import { useUserManagement } from '../contexts/UserManagementContext';
 import { usePermissions } from '../hooks/usePermissions';

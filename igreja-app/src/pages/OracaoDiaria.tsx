@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useCelula } from '../contexts/CelulaContext';
+
 import { useRedirectListener } from '../hooks/useRedirectListener';
 import {
   Container,
@@ -25,17 +25,9 @@ import {
   Group
 } from '@mui/icons-material';
 
-interface Oikos {
-  nome: string;
-  descricao: string;
-}
 
-interface MembroCelula {
-  id: string;
-  nome: string;
-  oikos1: Oikos;
-  oikos2: Oikos;
-}
+
+
 
 const OracaoDiaria: React.FC = () => {
   const { user } = useAuth();
