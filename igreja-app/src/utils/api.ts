@@ -1,46 +1,122 @@
-// Configuração centralizada da API
+import { 
+  authSupabase, 
+  usersSupabase, 
+  cellsSupabase, 
+  prayersSupabase, 
+  profileSupabase, 
+  healthSupabase 
+} from './supabaseUtils';
+
+// Manter compatibilidade com código existente
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 export const WS_BASE_URL = API_BASE_URL.replace('http', 'ws').replace('https', 'wss');
 
-// Função utilitária para fazer chamadas à API
+// Função utilitária para fazer chamadas à API usando Supabase
 export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}/api${endpoint}`;
+  const method = options.method || 'GET';
+  const body = options.body ? JSON.parse(options.body as string) : null;
   
-  const defaultOptions: RequestInit = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    credentials: 'include',
-    ...options,
-  };
-
-  // Adicionar token de autorização se disponível
-  const token = localStorage.getItem('token');
-  if (token) {
-    (defaultOptions.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
-  }
-
   try {
-    const response = await fetch(url, defaultOptions);
-    
-    // Se a resposta não for ok, lançar erro
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido' }));
-      throw new Error(errorData.message || `HTTP ${response.status}`);
+    // Roteamento baseado no endpoint
+    switch (true) {
+      // Autenticação
+      case endpoint === '/auth/login':
+        return await authSupabase.login(body.email, body.password);
+      
+      case endpoint === '/auth/register':
+        return await authSupabase.register(body);
+      
+      case endpoint.startsWith('/auth/me'):
+        const currentUserId = getCurrentUserId();
+        return await authSupabase.getCurrentUser(currentUserId);
+      
+      // Usuários
+      case endpoint === '/users' && method === 'GET':
+        return await usersSupabase.getAll();
+      
+      case endpoint === '/users' && method === 'POST':
+        return await usersSupabase.create(body);
+      
+      case endpoint.match(/^\/users\/\d+$/) && method === 'PUT':
+        const updateUserId = parseInt(endpoint.split('/')[2]);
+        return await usersSupabase.update(updateUserId, body);
+      
+      case endpoint.match(/^\/users\/\d+$/) && method === 'DELETE':
+        const deleteUserId = parseInt(endpoint.split('/')[2]);
+        return await usersSupabase.delete(deleteUserId);
+      
+      case endpoint.match(/^\/users\/\d+\/prayer-stats$/):
+        const statsUserId = parseInt(endpoint.split('/')[2]);
+        return await usersSupabase.getPrayerStats(statsUserId);
+      
+      // Células
+      case endpoint === '/cells' && method === 'GET':
+        return await cellsSupabase.getAll();
+      
+      case endpoint === '/cells/public':
+        return await cellsSupabase.getPublic();
+      
+      case endpoint === '/cells' && method === 'POST':
+        return await cellsSupabase.create(body);
+      
+      case endpoint.match(/^\/cells\/\d+$/) && method === 'PUT':
+        const updateCellId = parseInt(endpoint.split('/')[2]);
+        return await cellsSupabase.update(updateCellId, body);
+      
+      case endpoint.match(/^\/cells\/\d+$/) && method === 'DELETE':
+        const deleteCellId = parseInt(endpoint.split('/')[2]);
+        return await cellsSupabase.delete(deleteCellId);
+      
+      case endpoint.match(/^\/cells\/\d+\/members$/):
+        const cellId = parseInt(endpoint.split('/')[2]);
+        return await cellsSupabase.getMembers(cellId);
+      
+      // Orações
+      case endpoint === '/prayers/log' && method === 'POST':
+        const prayerUserId = getCurrentUserId();
+        return await prayersSupabase.logPrayer(prayerUserId, body?.prayer_date);
+      
+      case endpoint === '/prayers/status/today':
+        const statusUserId = getCurrentUserId();
+        return await prayersSupabase.getTodayStatus(statusUserId);
+      
+      // Perfil
+      case endpoint === '/profile' && method === 'GET':
+        const profileUserId = getCurrentUserId();
+        return await profileSupabase.get(profileUserId);
+      
+      case endpoint === '/profile' && method === 'PUT':
+        const updateProfileUserId = getCurrentUserId();
+        return await profileSupabase.update(updateProfileUserId, body);
+      
+      case endpoint === '/profile/complete' && method === 'POST':
+        const completeUserId = getCurrentUserId();
+        return await profileSupabase.complete(completeUserId, body);
+      
+      // Health Check
+      case endpoint === '/health':
+        return await healthSupabase.check();
+      
+      default:
+        throw new Error(`Endpoint não implementado: ${method} ${endpoint}`);
     }
-
-    // Se não há conteúdo, retornar null
-    if (response.status === 204) {
-      return null;
-    }
-
-    return await response.json();
   } catch (error) {
     console.error(`Erro na API ${endpoint}:`, error);
     throw error;
   }
 };
+
+// Função auxiliar para obter ID do usuário atual
+function getCurrentUserId(): number {
+  const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+  
+  // Extrair ID do token simulado (formato: supabase_token_123)
+  const userIdStr = token.replace('supabase_token_', '');
+  return parseInt(userIdStr);
+}
 
 // Função para fazer upload de arquivos
 export const apiUpload = async (endpoint: string, formData: FormData) => {

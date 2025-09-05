@@ -22,15 +22,21 @@ const AtendimentoPastoral: React.FC = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch('/api/pastoral-care', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
+      // Usar Supabase através do utilitário de API
+      const { pastoralCareSupabase } = await import('../utils/supabaseUtils');
+      
+      const response = await pastoralCareSupabase.create({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+        urgency: formData.urgency,
+        preferred_contact: formData.preferredContact
       });
       
-      if (response.ok) {
+      // Dados já obtidos do Supabase
+      if (response) {
         alert('Sua solicitação foi enviada! Entraremos em contato em breve.');
         setFormData({
           name: '',

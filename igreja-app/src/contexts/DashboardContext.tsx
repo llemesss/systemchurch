@@ -16,22 +16,8 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 // API Helper function
 const apiCallDashboard = async (endpoint: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
-  
-  const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
-  });
-  
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
-  }
-  
-  return response.json();
+  // Usar Supabase através do utilitário de API
+  return await apiCall(endpoint, options);
 };
 
 export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

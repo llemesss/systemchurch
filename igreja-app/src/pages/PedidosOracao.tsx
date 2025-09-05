@@ -75,23 +75,29 @@ const PedidosOracao: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+      if (!token) {
+        toast.error('Token não encontrado');
+        return;
+      }
       
-      const url = editingRequest 
-        ? `http://localhost:3001/api/prayer-requests/${editingRequest.id}`
-        : 'http://localhost:3001/api/prayer-requests';
+      // Usar Supabase através do utilitário de API
+      const { prayerRequestsSupabase } = await import('../utils/supabaseUtils');
+      const userId = parseInt(token.replace('supabase_token_', ''));
       
-      const method = editingRequest ? 'PUT' : 'POST';
+      let response;
+      if (editingRequest) {
+        response = await prayerRequestsSupabase.update(editingRequest.id, {
+          ...formData,
+          user_id: userId
+        });
+      } else {
+        response = await prayerRequestsSupabase.create({
+          ...formData,
+          user_id: userId
+        });
+      }
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      if (response.ok) {
+      if (response) {
         toast.success(editingRequest ? 'Pedido atualizado com sucesso!' : 'Pedido enviado com sucesso!');
         setFormData({
           title: '',
@@ -109,8 +115,7 @@ const PedidosOracao: React.FC = () => {
           fetchPublicRequests();
         }
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || 'Erro ao processar pedido');
+        toast.error('Erro ao processar pedido');
       }
     } catch (error) {
       console.error('Erro ao enviar pedido:', error);

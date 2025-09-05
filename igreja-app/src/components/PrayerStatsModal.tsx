@@ -63,18 +63,11 @@ const PrayerStatsModal: React.FC<PrayerStatsModalProps> = ({ member, isOpen, onC
         return;
       }
 
-      const response = await fetch(`http://localhost:3001/api/users/${member.id}/prayer-stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Usar Supabase através do utilitário de API
+    const { usersSupabase } = await import('../utils/supabaseUtils');
+    const data = await usersSupabase.getPrayerStats(parseInt(member.id));
 
-      if (!response.ok) {
-        throw new Error('Erro ao carregar estatísticas de oração');
-      }
-
-      const data = await response.json();
+      // Dados já obtidos do Supabase
       setPrayerStats(data);
     } catch (error) {
       console.error('Erro ao carregar estatísticas de oração:', error);

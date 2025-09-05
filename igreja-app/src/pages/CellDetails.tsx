@@ -91,20 +91,9 @@ const CellDetails: React.FC = () => {
         return;
       }
 
-      const apiUrl = `http://localhost:3001/api/cells/${cellId}/members`;
-      
-      const response = await fetch(apiUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar detalhes da célula');
-      }
-
-      const data = await response.json();
+      // Usar Supabase através do utilitário de API
+      const { cellsSupabase } = await import('../utils/supabaseUtils');
+      const data = await cellsSupabase.getMembers(parseInt(cellId!));
       setCellData(data);
     } catch (error) {
       console.error('Erro ao carregar detalhes da célula:', error);

@@ -42,73 +42,51 @@ const OracaoDiaria: React.FC = () => {
   // Escutar comandos de redirecionamento via WebSocket
   useRedirectListener();
   
-  // Função para buscar membros da célula via API
+  // Função para buscar membros da célula via Supabase
   const buscarMembrosDaCelula = async (cellId: string) => {
-    const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
-    if (!token) throw new Error('Token não encontrado');
+    // Usar Supabase através do utilitário de API
+    const { cellsSupabase } = await import('../utils/supabaseUtils');
+    const data = await cellsSupabase.getMembers(parseInt(cellId));
     
-    const response = await fetch(`http://localhost:3001/api/cells/${cellId}/members`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Erro ao buscar membros: ${response.statusText}`);
-    }
-    
-    return await response.json();
+    return data;
   };
   
-  // Função para verificar status da oração
-  const buscarStatusOracaoHoje = async () => {
-    const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
-    if (!token) throw new Error('Token não encontrado');
-    
-    const response = await fetch('http://localhost:3001/api/prayers/status/today', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Erro ao verificar status da oração: ${response.statusText}`);
-    }
-    
-    return await response.json();
-  };
+  // Função para verificar status da oração via Supabase
+   const buscarStatusOracaoHoje = async () => {
+     // Usar Supabase através do utilitário de API
+     const { prayersSupabase } = await import('../utils/supabaseUtils');
+     const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+     if (!token) throw new Error('Token não encontrado');
+     
+     const userId = parseInt(token.replace('supabase_token_', ''));
+     const data = await prayersSupabase.getTodayStatus(userId);
+     
+     return data;
+   };
   
-  // Função para registrar a oração
+  // Função para registrar a oração via Supabase
   const handlePrayerLog = async () => {
     try {
       setIsLoadingPrayer(true);
-      const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
-      if (!token) return;
       
-      const response = await fetch('http://localhost:3001/api/prayers/log', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Usar Supabase através do utilitário de API
+       const { prayersSupabase } = await import('../utils/supabaseUtils');
+       const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+       if (!token) throw new Error('Token não encontrado');
+       
+       const userId = parseInt(token.replace('supabase_token_', ''));
+       const data = await prayersSupabase.logPrayer(userId);
       
-      if (response.ok) {
-        const data = await response.json();
-        setAlreadyPrayed(true);
-        console.log('✅ PRAYER LOG - Oração registrada:', data);
-      } else if (response.status === 409) {
+      setAlreadyPrayed(true);
+      console.log('✅ PRAYER LOG - Oração registrada:', data);
+    } catch (error: any) {
+      if (error.message?.includes('already prayed')) {
         // Usuário já orou hoje
-        const data = await response.json();
         setAlreadyPrayed(true);
-        console.log('⚠️ PRAYER LOG - Já orou hoje:', data);
+        console.log('⚠️ PRAYER LOG - Já orou hoje:', error);
       } else {
-        console.error('❌ Erro ao registrar oração:', response.statusText);
+        console.error('❌ Erro ao registrar oração:', error);
       }
-    } catch (error) {
-      console.error('❌ Erro ao registrar oração:', error);
     } finally {
       setIsLoadingPrayer(false);
     }

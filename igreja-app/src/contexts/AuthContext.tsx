@@ -7,22 +7,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // API Helper functions
 const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
-  
-  const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
-  });
-  
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
-  }
-  
-  return response.json();
+  // Usar Supabase através do utilitário de API
+  const { apiCall: supabaseApiCall } = await import('../utils/api');
+  return await supabaseApiCall(endpoint, options);
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
