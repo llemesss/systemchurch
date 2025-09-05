@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { apiCall } from '../utils/api';
 import type {
   DashboardContextType,
   DashboardData,
@@ -14,7 +13,6 @@ import { useAuth } from './AuthContext';
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 // API Base URL
-import { apiCall } from '../utils/api';
 
 // API Helper function
 const apiCallDashboard = async (endpoint: string, options: RequestInit = {}) => {
