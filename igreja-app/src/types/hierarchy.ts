@@ -155,10 +155,11 @@ export interface EditUserData {
   name: string;
   email: string;
   phone?: string;
+  address?: string;
   role: UserRole;
   isActive: boolean;
   
-  // Associações condicionais
+  // Campos hierárquicos
   cell_id?: string;
   supervisor_cells?: string[]; // Para supervisores
   coordinator_supervisors?: string[]; // Para coordenadores

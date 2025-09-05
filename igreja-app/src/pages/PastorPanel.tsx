@@ -149,13 +149,14 @@ const PastorPanel: React.FC = () => {
   const [showPasswords, setShowPasswords] = useState<{[key: string]: boolean}>({});
 
   // Estado para o formulário de usuário
-  const [formData, setFormData] = useState<EditUserData & { password?: string }>({
+  const [formData, setFormData] = useState<EditUserData & { password?: string; address?: string }>({
     name: '',
     email: '',
     phone: '',
     address: '',
     role: 'Membro',
-    cell_id: null,
+    isActive: true,
+    cell_id: undefined,
     supervisor_cells: [],
     coordinator_supervisors: [],
     password: ''
@@ -242,7 +243,7 @@ const PastorPanel: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -255,7 +256,7 @@ const PastorPanel: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       role,
-      cell_id: role === 'Líder' ? prev.cell_id : null,
+      cell_id: role === 'Líder' ? prev.cell_id : undefined,
       supervisor_cells: role === 'Supervisor' ? prev.supervisor_cells : [],
       coordinator_supervisors: role === 'Coordenador' ? prev.coordinator_supervisors : []
     }));
@@ -330,11 +331,12 @@ const PastorPanel: React.FC = () => {
       name: user.name,
       email: user.email,
       phone: user.phone || '',
-      address: user.address || '',
+      address: '',
       role: user.role,
+      isActive: user.isActive,
       cell_id: user.cell_id,
-      supervisor_cells: user.supervisor_cells || [],
-      coordinator_supervisors: user.coordinator_supervisors || []
+      supervisor_cells: [],
+      coordinator_supervisors: []
     });
     setShowCreateForm(true);
   };
@@ -359,22 +361,7 @@ const PastorPanel: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    setIsLoading(true);
-    try {
-      const success = await deleteUser(userId);
-      if (success) {
-        toast.success('Usuário excluído com sucesso!');
-        await loadUsers();
-      } else {
-        toast.error('Erro ao excluir usuário');
-      }
-    } catch (error) {
-      toast.error('Erro ao excluir usuário');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Função removida - usando handleDelete diretamente
 
   const handleDeleteCell = async (cellId: string) => {
     setIsLoading(true);
@@ -520,7 +507,8 @@ const PastorPanel: React.FC = () => {
   };
 
   const getRoleColor = (role: UserRole): string => {
-    const colors = {
+    const colors: Record<UserRole, string> = {
+      'Admin': '#DC2626',
       'Pastor': '#8B5CF6',
       'Coordenador': '#3B82F6', 
       'Supervisor': '#10B981',
@@ -694,11 +682,12 @@ const PastorPanel: React.FC = () => {
                       onChange={(e) => handleRoleChange(e as any)}
                       label="Função"
                     >
-                      <MenuItem value="Membro">Membro</MenuItem>
-                      <MenuItem value="Líder">Líder</MenuItem>
-                      <MenuItem value="Supervisor">Supervisor</MenuItem>
-                      <MenuItem value="Coordenador">Coordenador</MenuItem>
+                      <MenuItem value="Admin">Admin</MenuItem>
                       <MenuItem value="Pastor">Pastor</MenuItem>
+                      <MenuItem value="Coordenador">Coordenador</MenuItem>
+                      <MenuItem value="Supervisor">Supervisor</MenuItem>
+                      <MenuItem value="Líder">Líder</MenuItem>
+                      <MenuItem value="Membro">Membro</MenuItem>
                     </Select>
                   </FormControl>
                 
