@@ -274,7 +274,7 @@ const MeuPerfil: React.FC = () => {
 
         <Grid container spacing={3}>
           {/* Identificação do Usuário */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <PersonIcon />
               Identificação do Usuário
@@ -282,7 +282,7 @@ const MeuPerfil: React.FC = () => {
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Nome Completo"
               variant="outlined"
@@ -293,7 +293,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Email"
               variant="outlined"
@@ -305,7 +305,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Célula"
               variant="outlined"
@@ -317,7 +317,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Líder"
               variant="outlined"
@@ -330,14 +330,14 @@ const MeuPerfil: React.FC = () => {
           </Grid>
 
           {/* Dados Pessoais */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
               Dados Pessoais
             </Typography>
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Telefone"
               variant="outlined"
@@ -349,7 +349,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="WhatsApp"
               variant="outlined"
@@ -361,7 +361,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl component="fieldset" margin="normal">
               <FormLabel component="legend">Sexo</FormLabel>
               <RadioGroup
@@ -375,7 +375,7 @@ const MeuPerfil: React.FC = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Data de Nascimento"
               type="date"
@@ -388,7 +388,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Idade"
               variant="outlined"
@@ -400,7 +400,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Cidade que nasceu"
               variant="outlined"
@@ -411,7 +411,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl fullWidth margin="normal">
               <InputLabel>UF</InputLabel>
               <Select
@@ -429,14 +429,14 @@ const MeuPerfil: React.FC = () => {
           </Grid>
 
           {/* Endereço */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
               Endereço
             </Typography>
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <TextField
               label="Endereço"
               variant="outlined"
@@ -447,7 +447,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <TextField
               label="Nº"
               variant="outlined"
@@ -458,7 +458,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Bairro"
               variant="outlined"
@@ -469,7 +469,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="CEP"
               variant="outlined"
@@ -481,7 +481,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               label="Ponto de Referência"
               variant="outlined"
@@ -493,7 +493,7 @@ const MeuPerfil: React.FC = () => {
           </Grid>
 
           {/* Família e Estado Civil */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="h6" gutterBottom sx={{ mt: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
               <FamilyRestroomIcon />
               Família e Estado Civil
@@ -501,7 +501,7 @@ const MeuPerfil: React.FC = () => {
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Filiação - Pai"
               variant="outlined"
@@ -512,7 +512,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Mãe"
               variant="outlined"
@@ -523,7 +523,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl fullWidth margin="normal">
               <InputLabel>Estado Civil</InputLabel>
               <Select
@@ -541,7 +541,7 @@ const MeuPerfil: React.FC = () => {
           </Grid>
 
           {profileData.maritalStatus === 'Casado(a)' && (
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 label="Nome do Cônjuge"
                 variant="outlined"
@@ -554,14 +554,14 @@ const MeuPerfil: React.FC = () => {
           )}
 
           {/* Educação e Profissão */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
               Educação e Profissão
             </Typography>
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl fullWidth margin="normal">
               <InputLabel>Escolaridade</InputLabel>
               <Select
@@ -578,7 +578,7 @@ const MeuPerfil: React.FC = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Profissão"
               variant="outlined"
@@ -590,14 +590,14 @@ const MeuPerfil: React.FC = () => {
           </Grid>
 
           {/* Informações da Igreja */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
               Informações da Igreja
             </Typography>
             <Divider sx={{ mb: 2 }} />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Data de Conversão/Reconciliação"
               type="date"
@@ -610,7 +610,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Se transferido(a), qual Igreja?"
               variant="outlined"
@@ -621,7 +621,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Nome do 1º Oikós (opcional)"
               variant="outlined"
@@ -634,7 +634,7 @@ const MeuPerfil: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               label="Nome do 2º Oikós (opcional)"
               variant="outlined"
@@ -648,7 +648,7 @@ const MeuPerfil: React.FC = () => {
           </Grid>
 
           {/* Botões de Ação */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 4 }}>
               <Button
                 variant="contained"
@@ -671,7 +671,7 @@ const MeuPerfil: React.FC = () => {
 
           {/* Lista de Dependentes */}
           {dependents.length > 0 && (
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
                 Dependentes Cadastrados
               </Typography>

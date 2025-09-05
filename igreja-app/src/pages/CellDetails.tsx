@@ -483,7 +483,7 @@ const CellDetails: React.FC = () => {
 
       {/* Cards de Estatísticas */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper elevation={3} sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />
@@ -499,7 +499,7 @@ const CellDetails: React.FC = () => {
           </Paper>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper elevation={3} sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <ChildCareIcon sx={{ fontSize: 40, color: 'warning.main' }} />
@@ -515,7 +515,7 @@ const CellDetails: React.FC = () => {
           </Paper>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper elevation={3} sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <PersonIcon sx={{ fontSize: 40, color: 'success.main' }} />
@@ -531,7 +531,7 @@ const CellDetails: React.FC = () => {
           </Paper>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper elevation={3} sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <SupervisorAccountIcon sx={{ fontSize: 40, color: 'secondary.main' }} />
