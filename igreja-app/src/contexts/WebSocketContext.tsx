@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { WS_BASE_URL } from '../utils/api';
+// WebSocket será implementado com Supabase Realtime
+// import { WS_BASE_URL } from '../utils/api';
 import toast from 'react-hot-toast';
 
 interface WebSocketContextType {
@@ -37,7 +38,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
     if (!token) return;
 
-    const wsUrl = `${WS_BASE_URL}/ws?token=${encodeURIComponent(token)}`;
+    // TODO: Implementar com Supabase Realtime
+    // const wsUrl = `${WS_BASE_URL}/ws?token=${encodeURIComponent(token)}`;
+    console.warn('WebSocket temporariamente desabilitado - implementar com Supabase Realtime');
+    return;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {

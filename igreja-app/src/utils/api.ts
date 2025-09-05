@@ -7,9 +7,7 @@ import {
   healthSupabase 
 } from './supabaseUtils';
 
-// Manter compatibilidade com código existente
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-export const WS_BASE_URL = API_BASE_URL.replace('http', 'ws').replace('https', 'wss');
+// Todas as chamadas agora usam Supabase - sem necessidade de API_BASE_URL
 
 // Função utilitária para fazer chamadas à API usando Supabase
 export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
@@ -118,43 +116,10 @@ function getCurrentUserId(): number {
   return parseInt(userIdStr);
 }
 
-// Função para fazer upload de arquivos
-export const apiUpload = async (endpoint: string, formData: FormData) => {
-  const url = `${API_BASE_URL}/api${endpoint}`;
-  
-  const token = localStorage.getItem('token');
-  const headers: Record<string, string> = {};
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+// Upload de arquivos agora deve ser implementado via Supabase Storage
+// Função removida - usar supabase.storage.from('bucket').upload() diretamente
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: formData,
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Erro no upload' }));
-      throw new Error(errorData.message || `HTTP ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`Erro no upload ${endpoint}:`, error);
-    throw error;
-  }
-};
-
-// URLs para diferentes serviços
-export const API_URLS = {
-  base: API_BASE_URL,
-  api: `${API_BASE_URL}/api`,
-  ws: `${WS_BASE_URL}/ws`,
-} as const;
+// URLs removidas - todas as operações agora usam Supabase diretamente
 
 // Endpoints específicos
 export const ENDPOINTS = {

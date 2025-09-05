@@ -1,4 +1,23 @@
-# Guia de Deploy - Igreja App
+# Guia Completo de Deploy - Igreja App
+
+## ✅ Status Atual
+
+### Backend (Render)
+- ✅ Código preparado para produção
+- ✅ Build configurado (`npm run build`)
+- ✅ PostgreSQL configurado
+- ✅ Variáveis de ambiente documentadas
+- ✅ Health check endpoint (`/api/health`)
+- ✅ CORS configurado
+- ✅ Arquivos de configuração criados
+
+### Frontend (Vercel)
+- ✅ Build funcionando (`npm run build`)
+- ✅ Variáveis de ambiente configuradas
+- ✅ Arquivos de configuração criados
+- ✅ Documentação de deploy criada
+
+## 📁 Arquivos Criados
 
 ## 📋 Visão Geral
 

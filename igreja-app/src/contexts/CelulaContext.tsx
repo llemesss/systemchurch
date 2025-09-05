@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, type ReactNode } from 'react';
-import { apiCall, API_URLS } from '../utils/api';
+import { apiCall } from '../utils/api';
 
 export interface Oikos {
   nome: string;
@@ -96,7 +96,7 @@ export const CelulaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   React.useEffect(() => {
     const loadPublicCells = async () => {
       try {
-        const response = await fetch(`${API_URLS.base}/api/cells/public`);
+        const response = await apiCall('/cells/public');
         if (response.ok) {
           const cellsData = await response.json();
           const publicCells: Cell[] = cellsData.map((cell: any) => ({
