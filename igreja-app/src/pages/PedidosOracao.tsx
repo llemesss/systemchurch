@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Heart, Send, Users, Clock, Lock, Globe, Plus, MessageCircle, Edit, Trash2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Heart, Send, Users, Clock, Lock, Globe, Plus, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiCall, ENDPOINTS } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -97,6 +97,8 @@ const PedidosOracao: React.FC = () => {
           title: '',
           description: '',
           category: 'espiritual',
+          name: '',
+          email: '',
           is_anonymous: false,
           is_public: false,
           urgency: 'normal'
@@ -158,6 +160,8 @@ const PedidosOracao: React.FC = () => {
       title: request.title,
       description: request.description,
       category: request.category,
+      name: request.author_name || '',
+      email: '',
       is_anonymous: request.is_anonymous,
       is_public: request.is_public,
       urgency: request.urgency
@@ -431,6 +435,8 @@ const PedidosOracao: React.FC = () => {
                         title: '',
                         description: '',
                         category: 'espiritual',
+                        name: '',
+                        email: '',
                         is_anonymous: false,
                         is_public: false,
                         urgency: 'normal'

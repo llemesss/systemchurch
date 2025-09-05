@@ -158,6 +158,7 @@ export interface UserManagementData {
   cellName?: string;
   supervisorName?: string;
   coordinatorName?: string;
+  supervisor_cells?: string[]; // Para supervisores
 }
 
 // Interface para edição de usuário

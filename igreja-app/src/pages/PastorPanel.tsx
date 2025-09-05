@@ -162,47 +162,7 @@ const PastorPanel: React.FC = () => {
     password: ''
   });
 
-  // Função para alterar senha
-  const handlePasswordChange = (userId: string, password: string) => {
-    setUserPasswords(prev => ({
-      ...prev,
-      [userId]: password
-    }));
-  };
 
-  // Função para resetar senha
-  const handleResetPassword = async (userId: string) => {
-    const password = userPasswords[userId];
-    
-    if (!password || password.length < 6) {
-      toast.error('A senha deve ter pelo menos 6 caracteres');
-      return;
-    }
-
-    setResettingPassword(prev => ({ ...prev, [userId]: true }));
-    
-    try {
-      const success = await resetUserPassword(userId, password);
-      
-      if (success) {
-        toast.success('Senha alterada com sucesso!');
-        setUserPasswords(prev => ({ ...prev, [userId]: '' }));
-      } else {
-        toast.error('Erro ao alterar senha');
-      }
-    } catch (error) {
-      toast.error('Erro ao alterar senha');
-    } finally {
-      setResettingPassword(prev => ({ ...prev, [userId]: false }));
-    }
-  };
-
-  const togglePasswordVisibility = (userId: string) => {
-    setShowPasswords(prev => ({
-      ...prev,
-      [userId]: !prev[userId]
-    }));
-  };
 
   const handleRedirectMenuOpen = (event: React.MouseEvent<HTMLElement>, user: UserManagementData) => {
     setRedirectMenuAnchor(event.currentTarget);
@@ -388,7 +348,8 @@ const PastorPanel: React.FC = () => {
       phone: '',
       address: '',
       role: 'Membro',
-      cell_id: null,
+      isActive: true,
+      cell_id: undefined,
       supervisor_cells: [],
       coordinator_supervisors: [],
       password: ''
@@ -415,7 +376,8 @@ const PastorPanel: React.FC = () => {
       phone: '',
       address: '',
       role: 'Membro',
-      cell_id: null,
+      isActive: true,
+      cell_id: undefined,
       supervisor_cells: [],
       coordinator_supervisors: [],
       password: ''
@@ -1108,8 +1070,8 @@ const PastorPanel: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Chip 
-                              label={user.is_active ? 'Ativo' : 'Inativo'}
-                              color={user.is_active ? 'success' : 'error'}
+                              label={user.isActive ? 'Ativo' : 'Inativo'}
+                              color={user.isActive ? 'success' : 'error'}
                               size="small"
                             />
                           </TableCell>
