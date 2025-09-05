@@ -31,6 +31,8 @@ const PedidosOracao: React.FC = () => {
     title: '',
     description: '',
     category: 'espiritual',
+    name: '',
+    email: '',
     is_anonymous: false,
     is_public: false,
     urgency: 'normal'
@@ -346,7 +348,7 @@ const PedidosOracao: React.FC = () => {
               </div>
               
               <div className="grid md:grid-cols-2 gap-6">
-                {!formData.isAnonymous && (
+                {!formData.is_anonymous && (
                   <>
                     <div>
                       <label className="block text-sm font-medium mb-2">
@@ -359,7 +361,7 @@ const PedidosOracao: React.FC = () => {
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-white/50"
                         placeholder="Seu nome completo"
-                        required={!formData.isAnonymous}
+                        required={!formData.is_anonymous}
                       />
                     </div>
                     

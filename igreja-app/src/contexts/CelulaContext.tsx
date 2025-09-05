@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { apiCall, API_BASE_URL } from '../utils/api';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { apiCall, API_URLS } from '../utils/api';
 
 export interface Oikos {
   nome: string;

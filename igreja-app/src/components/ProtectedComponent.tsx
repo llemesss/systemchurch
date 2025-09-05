@@ -1,10 +1,11 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { AlertCircle } from 'lucide-react';
+import type { UserRole } from '../types/hierarchy';
 
 interface ProtectedComponentProps {
   children: React.ReactNode;
-  allowedRoles?: ('Admin' | 'Líder' | 'Membro')[];
+  allowedRoles?: UserRole[];
   requireAuth?: boolean;
   fallback?: React.ReactNode;
   showAccessDenied?: boolean;
@@ -12,7 +13,7 @@ interface ProtectedComponentProps {
 
 const ProtectedComponent: React.FC<ProtectedComponentProps> = ({
   children,
-  allowedRoles = ['Admin', 'Líder', 'Membro'],
+  allowedRoles = ['Admin', 'Pastor', 'Coordenador', 'Supervisor', 'Líder', 'Membro'],
   requireAuth = true,
   fallback = null,
   showAccessDenied = true

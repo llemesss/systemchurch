@@ -87,7 +87,7 @@ export interface CreateCellData {
 // Interface para dados do dashboard baseado em role
 export interface DashboardData {
   role: UserRole;
-  data: CoordinatorData | SupervisorData | LeaderData | MemberData;
+  data: PastorData | CoordinatorData | SupervisorData | LeaderData | MemberData;
 }
 
 // Dados específicos para Coordenador
@@ -127,6 +127,16 @@ export interface MemberData {
     leaderName: string;
   };
   oracaoDiaria: boolean;
+}
+
+// Dados específicos para Pastor
+export interface PastorData {
+  totalUsers: number;
+  totalCells: number;
+  totalCoordinators: number;
+  totalSupervisors: number;
+  totalLeaders: number;
+  totalMembers: number;
 }
 
 // Interface para gerenciamento de usuários (Pastor)

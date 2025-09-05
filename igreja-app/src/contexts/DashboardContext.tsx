@@ -1,12 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { 
-  DashboardContextType, 
-  DashboardData, 
-  CoordinatorData, 
-  SupervisorData, 
-  LeaderData, 
-  MemberData,
-  UserRole 
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { apiCall } from '../utils/api';
+import type {
+  DashboardContextType,
+  DashboardData,
+  PastorData,
+  CoordinatorData,
+  SupervisorData,
+  LeaderData,
+  MemberData
 } from '../types/hierarchy';
 import { useAuth } from './AuthContext';
 
@@ -132,7 +133,6 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
           break;
 
         case 'Líder':
-          const leaderUsers = await apiCallDashboard('/users');
           const userCells = await apiCallDashboard(`/user-cells/user/${user.id}`);
           
           // Encontrar a célula onde o usuário é líder
