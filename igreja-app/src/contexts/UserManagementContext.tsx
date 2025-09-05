@@ -1,16 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { 
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import type { 
   User, 
   UserManagementData, 
   UserManagementContextType, 
   EditUserData, 
-  Cell,
-  UserRole 
+  Cell
 } from '../types/hierarchy';
 
 const UserManagementContext = createContext<UserManagementContextType | undefined>(undefined);
 
-import { apiCall } from '../utils/api';
+
 
 // API Helper functions
 const apiCallUserMgmt = async (endpoint: string, options: RequestInit = {}) => {

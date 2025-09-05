@@ -10,7 +10,6 @@ import {
   Phone, 
   Mail, 
   MapPin,
-  Calendar,
   Heart,
   ArrowLeft
 } from 'lucide-react';
@@ -25,7 +24,7 @@ interface AddMemberForm {
 
 const LeaderDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { getMyCellMembers, cells, getCellById } = useCelula();
+  const { getMyCellMembers, getCellById } = useCelula();
   const navigate = useNavigate();
   const [showAddMember, setShowAddMember] = useState(false);
   const [editingMember, setEditingMember] = useState<any>(null);
@@ -37,7 +36,7 @@ const LeaderDashboard: React.FC = () => {
   });
 
   const myCell = user?.cell_id ? getCellById(user.cell_id) : null;
-  const myMembers = getMyCellMembers();
+  const myMembers = user ? getMyCellMembers(user.id) : [];
 
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +87,7 @@ const LeaderDashboard: React.FC = () => {
             <h1>Dashboard do Líder</h1>
             {myCell && (
               <p className="cell-info">
-                Célula {myCell.number} - {myCell.name}
+                Célula {myCell.cell_number}
               </p>
             )}
           </div>
@@ -118,7 +117,7 @@ const LeaderDashboard: React.FC = () => {
             <Heart size={24} />
           </div>
           <div className="stat-info">
-            <h3>{myCell?.meeting_day || 'N/A'}</h3>
+            <h3>N/A</h3>
             <p>Dia de Reunião</p>
           </div>
         </div>
@@ -127,7 +126,7 @@ const LeaderDashboard: React.FC = () => {
             <MapPin size={24} />
           </div>
           <div className="stat-info">
-            <h3>{myCell?.location || 'N/A'}</h3>
+            <h3>N/A</h3>
             <p>Local</p>
           </div>
         </div>
@@ -155,10 +154,10 @@ const LeaderDashboard: React.FC = () => {
               <div key={member.id} className="member-card">
                 <div className="member-header">
                   <div className="member-avatar">
-                    {member.name.charAt(0).toUpperCase()}
+                    {member.nome.charAt(0).toUpperCase()}
                   </div>
                   <div className="member-info">
-                    <h3>{member.name}</h3>
+                    <h3>{member.nome}</h3>
                     <p className="member-oikos">{member.oikos_name}</p>
                   </div>
                   <div className="member-actions">

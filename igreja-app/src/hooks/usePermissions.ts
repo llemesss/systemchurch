@@ -1,5 +1,5 @@
 import { useAuth } from '../contexts/AuthContext';
-import { UserRole, PermissionConfig } from '../types/hierarchy';
+import type { UserRole, PermissionConfig } from '../types/hierarchy';
 
 export const usePermissions = () => {
   const { user, isAuthenticated } = useAuth();

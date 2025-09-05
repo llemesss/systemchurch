@@ -164,7 +164,7 @@ const PastorPanel: React.FC = () => {
     try {
       await getAllUsers();
       await getAllCells();
-    } catch (error) {
+    } catch {
       toast.error('Erro ao carregar dados');
     } finally {
       setIsLoading(false);
@@ -246,7 +246,7 @@ const PastorPanel: React.FC = () => {
           toast.error('Erro ao atualizar usuário');
         }
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao processar solicitação');
     } finally {
       setIsSubmitting(false);
@@ -282,7 +282,7 @@ const PastorPanel: React.FC = () => {
       } else {
         toast.error('Erro ao excluir usuário');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao excluir usuário');
     } finally {
       setIsLoading(false);
@@ -302,7 +302,7 @@ const PastorPanel: React.FC = () => {
       } else {
         toast.error('Erro ao excluir célula');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao excluir célula');
     } finally {
       setIsLoading(false);

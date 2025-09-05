@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { WS_BASE_URL } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -6,6 +7,7 @@ import toast from 'react-hot-toast';
 interface WebSocketContextType {
   isConnected: boolean;
   sendRedirectCommand: (userId: string, page: string) => void;
+  lastMessage: any;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
@@ -26,6 +28,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   const { user } = useAuth();
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [lastMessage, setLastMessage] = useState<any>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -46,6 +49,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        setLastMessage(data);
         
         if (data.type === 'redirect') {
           // Redirecionar o usuário para a página especificada
@@ -111,7 +115,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
   const value: WebSocketContextType = {
     isConnected,
-    sendRedirectCommand
+    sendRedirectCommand,
+    lastMessage
   };
 
   return (

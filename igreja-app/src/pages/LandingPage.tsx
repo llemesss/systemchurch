@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Users, Heart, Calendar } from 'lucide-react';
 import '../styles/globals.css';
 
 const LandingPage: React.FC = () => {
@@ -21,9 +20,7 @@ const LandingPage: React.FC = () => {
     navigate('/login');
   };
 
-  const handleGuestAccess = () => {
-    navigate('/dashboard');
-  };
+
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -33,9 +30,7 @@ const LandingPage: React.FC = () => {
     setIsMenuOpen(false);
   };
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+
 
   return (
     <div className="min-h-screen" style={{

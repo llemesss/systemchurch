@@ -31,7 +31,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import PrayerStatsModal from '../components/PrayerStatsModal';
 
 interface CellMember {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string;

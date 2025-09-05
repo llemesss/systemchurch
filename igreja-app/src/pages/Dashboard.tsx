@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useRedirectListener } from '../hooks/useRedirectListener';
@@ -10,16 +9,11 @@ import {
   Calendar, 
   Heart, 
   DollarSign, 
-  MapPin,
   Briefcase,
   Baby,
-  Search,
   Radio, 
   Newspaper, 
   Play,
-  Settings,
-  User,
-  LogOut,
   Store,
   HandHeart,
   Shield,
@@ -38,8 +32,7 @@ interface MenuCard {
 }
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   
   // Escutar comandos de redirecionamento via WebSocket
   useRedirectListener();
@@ -47,18 +40,13 @@ const Dashboard: React.FC = () => {
     canAccessAdminPanel, 
     canAccessLeaderDashboard,
     canAccessPastorPanel,
-    canAccessCoordinatorDashboard,
-    canAccessSupervisorDashboard,
     isPastor,
     isCoordinator,
     isSupervisor,
     isLeaderOrAbove
   } = usePermissions();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+
   const baseMenuItems: MenuCard[] = [
     {
       id: 'palavra-pastor',

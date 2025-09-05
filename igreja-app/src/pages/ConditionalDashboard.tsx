@@ -16,7 +16,7 @@ import {
 import { useDashboard } from '../contexts/DashboardContext';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { DashboardData, UserRole } from '../types/hierarchy';
+
 
 interface SupervisorCard {
   id: string;
@@ -44,10 +44,10 @@ interface MemberDetail {
 const ConditionalDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { dashboardData, loadDashboardData, refreshDashboardData } = useDashboard();
+  const { dashboardData, loadDashboardData } = useDashboard();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedView, setSelectedView] = useState<'main' | 'detail'>('main');
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [, setSelectedItem] = useState<string | null>(null);
   const [detailData, setDetailData] = useState<any>(null);
 
   useEffect(() => {
@@ -78,7 +78,7 @@ const ConditionalDashboard: React.FC = () => {
   };
 
   const renderCoordinatorView = () => {
-    const supervisors = dashboardData?.supervisors || [];
+    const supervisors = (dashboardData?.data as any)?.supervisors || [];
     
     return (
       <div className="coordinator-dashboard">
@@ -94,11 +94,11 @@ const ConditionalDashboard: React.FC = () => {
             </div>
             <div className="stat-card">
               <Building size={20} />
-              <span>Total de Células: {supervisors.reduce((acc, s) => acc + s.cellCount, 0)}</span>
+              <span>Total de Células: {supervisors.reduce((acc: number, s: any) => acc + s.cellCount, 0)}</span>
             </div>
             <div className="stat-card">
               <UserCheck size={20} />
-              <span>Total de Membros: {supervisors.reduce((acc, s) => acc + s.memberCount, 0)}</span>
+              <span>Total de Membros: {supervisors.reduce((acc: number, s: any) => acc + s.memberCount, 0)}</span>
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@ const ConditionalDashboard: React.FC = () => {
   };
 
   const renderSupervisorView = () => {
-    const cells = dashboardData?.cells || [];
+    const cells = (dashboardData?.data as any)?.cells || [];
     
     return (
       <div className="supervisor-dashboard">
@@ -152,7 +152,7 @@ const ConditionalDashboard: React.FC = () => {
             </div>
             <div className="stat-card">
               <Users size={20} />
-              <span>Total de Membros: {cells.reduce((acc, c) => acc + c.memberCount, 0)}</span>
+              <span>Total de Membros: {cells.reduce((acc: number, c: any) => acc + c.memberCount, 0)}</span>
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ const ConditionalDashboard: React.FC = () => {
   };
 
   const renderLeaderView = () => {
-    const members = dashboardData?.members || [];
+    const members = (dashboardData?.data as any)?.members || [];
     
     return (
       <div className="leader-dashboard">

@@ -35,7 +35,7 @@ const LoginPage: React.FC = () => {
       } else {
         setError('E-mail ou senha incorretos. Tente novamente.');
       }
-    } catch (err) {
+    } catch {
       setError('Erro ao fazer login. Tente novamente.');
     } finally {
       setIsSubmitting(false);

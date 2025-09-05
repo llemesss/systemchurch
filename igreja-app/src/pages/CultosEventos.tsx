@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Music, Heart, Star, Filter } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, MapPin, Music, Star, Filter } from 'lucide-react';
 
 interface Event {
   id: number;

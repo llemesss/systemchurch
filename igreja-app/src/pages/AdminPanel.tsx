@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useUserManagement } from '../contexts/UserManagementContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ProtectedComponent from '../components/ProtectedComponent';
-import { Edit, Trash2, Users, Phone, Mail, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 const AdminPanel: React.FC = () => {
-  const { user } = useAuth();
+  const { } = useAuth();
   const navigate = useNavigate();
   const { 
     // Funções do contexto de gerenciamento de usuários podem ser adicionadas aqui conforme necessário

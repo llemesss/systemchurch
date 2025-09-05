@@ -64,7 +64,7 @@ interface Dependent {
 
 const MeuPerfil: React.FC = () => {
   const { user } = useAuth();
-  const { cells, leaders } = useCelula();
+  const { cells } = useCelula();
   const [loading, setLoading] = useState(false);
   const [dependentModalOpen, setDependentModalOpen] = useState(false);
   const [dependents, setDependents] = useState<Dependent[]>([]);
@@ -261,9 +261,8 @@ const MeuPerfil: React.FC = () => {
     }
   };
 
-  // Encontrar célula e líder do usuário
+  // Encontrar célula do usuário
   const userCell = cells?.find(cell => cell.id === user?.cell_id);
-  const userLeader = leaders?.find(leader => leader.id === userCell?.leader_1_id);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

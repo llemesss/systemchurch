@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { User, AuthContextType, RegisterData, UserRole } from '../types/hierarchy';
+import type { User, AuthContextType, RegisterData } from '../types/hierarchy';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-import { apiCall, ENDPOINTS } from '../utils/api';
+
 
 // API Helper functions
 const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {

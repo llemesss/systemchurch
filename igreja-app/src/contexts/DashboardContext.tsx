@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, type ReactNode } from 'react';
 import type {
-  DashboardContextType,
   DashboardData,
-  PastorData,
+  DashboardContextType,
   CoordinatorData,
   SupervisorData,
   LeaderData,
   MemberData
 } from '../types/hierarchy';
 import { useAuth } from './AuthContext';
+import { apiCall } from '../utils/api';
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
