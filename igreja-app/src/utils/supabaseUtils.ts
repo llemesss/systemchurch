@@ -113,14 +113,16 @@ export const authSupabase = {
     cell_id?: string;
     oikos_name?: string;
   }) {
-    // Usar autenticação nativa do Supabase
+    // Usar autenticação nativa do Supabase com metadados completos
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: userData.email,
       password: userData.password,
       options: {
         data: {
           name: userData.name,
-          phone: userData.phone
+          phone: userData.phone,
+          cell_id: userData.cell_id,
+          oikos_name: userData.oikos_name
         }
       }
     });
@@ -133,37 +135,54 @@ export const authSupabase = {
       throw new Error('Erro ao criar usuário');
     }
 
-    // Criar registro na tabela customizada de usuários
-    const { data, error } = await supabase
+    // ✅ TRIGGER AUTOMÁTICO: O registro na tabela 'users' será criado automaticamente
+    // pelo trigger 'on_auth_user_created' que executa a função 'handle_new_user()'
+    
+    // Aguardar um pouco para o trigger processar
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Buscar o usuário criado pelo trigger
+    const { data: createdUser, error: fetchError } = await supabase
       .from('users')
-      .insert({
-        id: authData.user.id, // Usar o ID do auth
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        role: 'Membro',
-        status: 'Ativo',
-        cell_id: userData.cell_id ? parseInt(userData.cell_id) : null
-      })
-      .select()
+      .select('*')
+      .eq('id', authData.user.id)
       .single();
 
-    if (error) {
-      // Se falhar ao criar na tabela customizada, ainda retorna o usuário do auth
-      console.warn('Erro ao criar registro customizado:', error.message);
+    if (fetchError) {
+      console.warn('⚠️ Usuário criado no auth mas não encontrado na tabela users. Trigger pode não estar ativo:', fetchError.message);
     }
 
-    // Se há oikos_name, criar perfil
-    if (userData.oikos_name && authData.user) {
+    // Se há dados adicionais (cell_id, oikos_name), atualizar o registro
+    if (createdUser && (userData.cell_id || userData.oikos_name)) {
+      const updateData: any = {};
+      
+      if (userData.cell_id) {
+        updateData.cell_id = parseInt(userData.cell_id);
+      }
+      
+      // Atualizar na tabela users
       await supabase
-        .from('user_profiles')
-        .insert({
-          user_id: authData.user.id,
-          oikos_name: userData.oikos_name
-        });
+        .from('users')
+        .update(updateData)
+        .eq('id', authData.user.id);
+      
+      // Se há oikos_name, criar perfil separado
+      if (userData.oikos_name) {
+        await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: authData.user.id,
+            oikos_name: userData.oikos_name
+          });
+      }
     }
 
-    return data;
+    return createdUser || {
+      id: authData.user.id,
+      email: authData.user.email,
+      name: userData.name,
+      role: 'Membro'
+    };
   },
 
   async getCurrentUser(userId?: string) {
