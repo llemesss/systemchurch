@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './contexts/AuthContext';
+import { useEffect } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CelulaProvider } from './contexts/CelulaContext';
 import { UserManagementProvider } from './contexts/UserManagementContext';
 import { DashboardProvider } from './contexts/DashboardContext';
@@ -25,16 +26,26 @@ import CellDetails from './pages/CellDetails';
 import MeuPerfil from './pages/MeuPerfil';
 import './styles/globals.css';
 
-function App() {
+// Componente interno que tem acesso ao contexto de autenticação
+function AppRoutes() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Lógica de redirecionamento pós-login
+  useEffect(() => {
+    // Apenas redireciona se o carregamento inicial da autenticação já terminou
+    if (!isLoading && isAuthenticated) {
+      // Se o usuário está logado e está na página de login ou landing, redirecione para a dashboard
+      if (location.pathname === '/login' || location.pathname === '/') {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, isLoading, navigate, location.pathname]);
+
   return (
-    <AuthProvider>
-      <WebSocketProvider>
-        <UserManagementProvider>
-          <DashboardProvider>
-            <CelulaProvider>
-            <Router>
-        <div className="App">
-          <Routes>
+    <div className="App">
+      <Routes>
             {/* Public routes */}
             <Route path="/" element={<LandingPage />} />
             <Route 
@@ -106,31 +117,43 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
-            </Router>
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#363636',
-                  color: '#fff',
-                },
-                success: {
-                  duration: 3000,
-                  iconTheme: {
-                    primary: '#4ade80',
-                    secondary: '#fff',
-                  },
-                },
-                error: {
-                  duration: 4000,
-                  iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#fff',
-                  },
-                },
-              }}
-            />
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <WebSocketProvider>
+        <UserManagementProvider>
+          <DashboardProvider>
+            <CelulaProvider>
+              <Router>
+                <AppRoutes />
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: '#363636',
+                      color: '#fff',
+                    },
+                    success: {
+                      duration: 3000,
+                      iconTheme: {
+                        primary: '#4ade80',
+                        secondary: '#fff',
+                      },
+                    },
+                    error: {
+                      duration: 4000,
+                      iconTheme: {
+                        primary: '#ef4444',
+                        secondary: '#fff',
+                      },
+                    },
+                  }}
+                />
+              </Router>
             </CelulaProvider>
           </DashboardProvider>
         </UserManagementProvider>

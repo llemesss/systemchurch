@@ -25,13 +25,44 @@ const RegisterPage: React.FC = () => {
   
   const availableCells = getPublicCells();
 
+  // Função para validar email
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
     // Validações
-    if (!formData.cell_id) {
-      setError('Por favor, selecione uma célula.');
+    if (!formData.name.trim()) {
+      setError('Por favor, digite seu nome completo.');
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      setError('Por favor, digite seu e-mail.');
+      return;
+    }
+    
+    if (!isValidEmail(formData.email)) {
+      setError('Por favor, digite um e-mail válido.');
+      return;
+    }
+    
+    if (!formData.password) {
+      setError('Por favor, digite uma senha.');
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    
+    if (!formData.confirmPassword) {
+      setError('Por favor, confirme sua senha.');
       return;
     }
     
@@ -40,8 +71,13 @@ const RegisterPage: React.FC = () => {
       return;
     }
     
-    if (formData.password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres.');
+    if (!formData.phone.trim()) {
+      setError('Por favor, digite seu telefone.');
+      return;
+    }
+    
+    if (!formData.cell_id) {
+      setError('Por favor, selecione uma célula.');
       return;
     }
     

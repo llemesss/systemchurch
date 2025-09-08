@@ -176,27 +176,40 @@ export const authSupabase = {
       userId = user.id;
     }
 
+    // Primeiro, tentar buscar na tabela users usando auth_id
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq('id', userId)
+      .eq('auth_id', userId)
       .single();
 
-    if (error) {
+    if (error || !data) {
       // Se não encontrar na tabela customizada, usar dados do auth
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         return {
           id: user.id,
           email: user.email,
-          name: user.user_metadata?.name || user.email?.split('@')[0],
-          role: 'Membro'
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
+          role: 'Membro',
+          memberSince: user.created_at || new Date().toISOString(),
+          isActive: true
         };
       }
       throw new Error('Usuário não encontrado');
     }
 
-    return data;
+    // Mapear dados da tabela para o formato esperado
+    return {
+      id: data.auth_id || userId,
+      email: data.email,
+      name: data.name,
+      role: data.role,
+      memberSince: data.created_at,
+      isActive: data.status === 'Ativo',
+      phone: data.phone,
+      cell_id: data.cell_id
+    };
   }
 };
 

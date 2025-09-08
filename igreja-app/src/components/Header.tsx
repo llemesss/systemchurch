@@ -11,9 +11,15 @@ const Header: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Erro no logout:', error);
+      // Mesmo com erro, redirecionar para login
+      navigate('/login');
+    }
   };
 
   return (

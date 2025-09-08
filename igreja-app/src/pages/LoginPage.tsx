@@ -21,17 +21,48 @@ const LoginPage: React.FC = () => {
   // Get the page user was trying to access before login
   const from = location.state?.from?.pathname || '/dashboard';
 
+  // Função para validar email
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validações frontend
+    if (!formData.email.trim()) {
+      setError('Por favor, digite seu e-mail.');
+      return;
+    }
+    
+    if (!isValidEmail(formData.email)) {
+      setError('Por favor, digite um e-mail válido.');
+      return;
+    }
+    
+    if (!formData.password) {
+      setError('Por favor, digite sua senha.');
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setError('A senha deve ter no mínimo 6 caracteres.');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
       const success = await login(formData.email, formData.password, formData.rememberMe);
       
       if (success) {
-        // Redirect to the page user was trying to access or dashboard
-        navigate(from, { replace: true });
+        // O redirecionamento será tratado pelo useEffect no App.tsx
+        // mas também fazemos um redirecionamento explícito aqui como fallback
+        setTimeout(() => {
+          navigate(from, { replace: true });
+        }, 100);
       } else {
         setError('E-mail ou senha incorretos. Tente novamente.');
       }

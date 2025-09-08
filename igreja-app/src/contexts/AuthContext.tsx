@@ -19,13 +19,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const checkSupabaseAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Timeout para evitar carregamento infinito
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout na verificação de autenticação')), 10000)
+        );
+        
+        const authPromise = supabase.auth.getSession();
+        
+        const { data: { session } } = await Promise.race([authPromise, timeoutPromise]) as any;
         console.log('🔍 AUTH DEBUG - Sessão encontrada:', !!session);
         
         if (session?.user) {
           // Buscar dados adicionais do usuário
           try {
-            const response = await apiCallAuth('/auth/me');
+            const userDataPromise = apiCallAuth('/auth/me');
+            const userTimeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout ao buscar dados do usuário')), 5000)
+            );
+            
+            const response = await Promise.race([userDataPromise, userTimeoutPromise]);
             console.log('🔍 AUTH DEBUG - Usuário carregado:', response);
             setUser(response);
           } catch (error) {
@@ -46,6 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       } catch (error) {
         console.error('❌ AUTH DEBUG - Erro na verificação da sessão:', error);
+        // Em caso de timeout ou erro, definir como não autenticado
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -144,10 +157,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await supabase.auth.signOut();
       setUser(null);
+      
+      // Limpar dados persistidos no localStorage e sessionStorage
+      localStorage.removeItem('igreja_user');
+      localStorage.removeItem('igreja_token');
+      sessionStorage.removeItem('igreja_user');
+      sessionStorage.removeItem('igreja_token');
+      
+      console.log('✅ AUTH DEBUG - Logout realizado com sucesso');
     } catch (error) {
       console.error('Logout error:', error);
-      // Mesmo com erro, limpar o estado local
+      // Mesmo com erro, limpar o estado local e dados persistidos
       setUser(null);
+      localStorage.removeItem('igreja_user');
+      localStorage.removeItem('igreja_token');
+      sessionStorage.removeItem('igreja_user');
+      sessionStorage.removeItem('igreja_token');
     }
   };
 
