@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { User, AuthContextType, RegisterData } from '../types/hierarchy';
+import { supabase } from '../supabaseClient';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-
 
 // API Helper functions
 const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {
@@ -16,66 +15,95 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for stored authentication on component mount
+  // Check for Supabase authentication on component mount
   useEffect(() => {
-    const checkStoredAuth = async () => {
+    const checkSupabaseAuth = async () => {
       try {
-        const storedToken = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
-        console.log('🔍 AUTH DEBUG - Token encontrado:', !!storedToken);
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 AUTH DEBUG - Sessão encontrada:', !!session);
         
-        if (storedToken) {
-          // Verify token with backend
-          const response = await apiCallAuth('/auth/verify');
-          console.log('🔍 AUTH DEBUG - Resposta da verificação:', response);
-          if (response.user) {
-            console.log('🔍 AUTH DEBUG - Usuário carregado:', response.user);
-            console.log('🔍 AUTH DEBUG - cell_id do usuário:', response.user.cell_id);
-            setUser(response.user);
-          } else {
-            console.log('❌ AUTH DEBUG - Token inválido, limpando storage');
-            // Token is invalid, clear storage
-            localStorage.removeItem('igreja_user');
-            localStorage.removeItem('igreja_token');
-            sessionStorage.removeItem('igreja_user');
-            sessionStorage.removeItem('igreja_token');
+        if (session?.user) {
+          // Buscar dados adicionais do usuário
+          try {
+            const response = await apiCallAuth('/auth/me');
+            console.log('🔍 AUTH DEBUG - Usuário carregado:', response);
+            setUser(response);
+          } catch (error) {
+            console.warn('⚠️ AUTH DEBUG - Erro ao buscar dados do usuário, usando dados básicos:', error);
+            // Usar dados básicos do auth se não conseguir buscar da tabela customizada
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário',
+              role: 'Membro'
+            });
           }
         } else {
-          console.log('❌ AUTH DEBUG - Nenhum token encontrado');
+          console.log('❌ AUTH DEBUG - Nenhuma sessão encontrada');
+          setUser(null);
         }
       } catch (error) {
-        console.error('❌ AUTH DEBUG - Erro na verificação:', error);
-        // Clear invalid stored data
-        localStorage.removeItem('igreja_user');
-        localStorage.removeItem('igreja_token');
-        sessionStorage.removeItem('igreja_user');
-        sessionStorage.removeItem('igreja_token');
+        console.error('❌ AUTH DEBUG - Erro na verificação da sessão:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkStoredAuth();
+    checkSupabaseAuth();
+
+    // Listener para mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔍 AUTH DEBUG - Mudança de estado:', event, !!session);
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        try {
+          const response = await apiCallAuth('/auth/me');
+          setUser(response);
+        } catch (error) {
+          console.warn('⚠️ AUTH DEBUG - Erro ao buscar dados do usuário:', error);
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário',
+            role: 'Membro'
+          });
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
     setIsLoading(true);
     
     try {
-      const response = await apiCallAuth('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
       
-      if (response.token && response.user) {
-        setUser(response.user);
-        
-        // Store authentication data
-        if (rememberMe) {
-          localStorage.setItem('igreja_user', JSON.stringify(response.user));
-          localStorage.setItem('igreja_token', response.token);
-        } else {
-          sessionStorage.setItem('igreja_user', JSON.stringify(response.user));
-          sessionStorage.setItem('igreja_token', response.token);
+      if (error) {
+        console.error('Login error:', error.message);
+        return false;
+      }
+      
+      if (data.user) {
+        // Buscar dados adicionais do usuário
+        try {
+          const userData = await apiCallAuth('/auth/me');
+          setUser(userData);
+        } catch (userError) {
+          console.warn('Erro ao buscar dados do usuário, usando dados básicos:', userError);
+          setUser({
+            id: data.user.id,
+            email: data.user.email || '',
+            name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
+            role: 'Membro'
+          });
         }
         
         return true;
@@ -90,14 +118,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    
-    // Clear stored authentication data
-    localStorage.removeItem('igreja_user');
-    localStorage.removeItem('igreja_token');
-    sessionStorage.removeItem('igreja_user');
-    sessionStorage.removeItem('igreja_token');
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Mesmo com erro, limpar o estado local
+      setUser(null);
+    }
   };
 
   const register = async (userData: RegisterData): Promise<boolean> => {
@@ -117,9 +146,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       
       if (response.user) {
-        // Auto-login after successful registration
-        const loginSuccess = await login(userData.email, userData.password, true);
-        return loginSuccess;
+        // O Supabase já faz login automático após registro bem-sucedido
+        // Apenas definir o usuário no estado
+        setUser(response.user);
+        return true;
       }
       
       return false;

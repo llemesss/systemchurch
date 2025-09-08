@@ -1,0 +1,14 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="24" fill="#4F46E5"/>
+  <g transform="translate(48, 48)">
+    <!-- Igreja/Cruz -->
+    <path d="M48 16 L48 8 L56 8 L56 16 L64 16 L64 24 L56 24 L56 32 L48 32 L48 24 L40 24 L40 16 Z" fill="white"/>
+    <!-- Base da igreja -->
+    <rect x="32" y="32" width="32" height="48" rx="4" fill="white"/>
+    <!-- Porta -->
+    <rect x="44" y="56" width="8" height="24" rx="2" fill="#4F46E5"/>
+    <!-- Janelas -->
+    <rect x="36" y="40" width="6" height="8" rx="1" fill="#4F46E5"/>
+    <rect x="54" y="40" width="6" height="8" rx="1" fill="#4F46E5"/>
+  </g>
+</svg>

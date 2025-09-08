@@ -25,7 +25,7 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
         return await authSupabase.register(body);
       
       case endpoint.startsWith('/auth/me'):
-        const currentUserId = getCurrentUserId();
+        const currentUserId = await getCurrentUserId();
         return await authSupabase.getCurrentUser(currentUserId);
       
       // Usuários
@@ -105,15 +105,15 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
 };
 
 // Função auxiliar para obter ID do usuário atual
-function getCurrentUserId(): number {
-  const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
-  if (!token) {
-    throw new Error('Token de autenticação não encontrado');
+async function getCurrentUserId(): Promise<string> {
+  const { supabase } = await import('../supabaseClient');
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('Usuário não autenticado');
   }
   
-  // Extrair ID do token simulado (formato: supabase_token_123)
-  const userIdStr = token.replace('supabase_token_', '');
-  return parseInt(userIdStr);
+  return user.id;
 }
 
 // Upload de arquivos agora deve ser implementado via Supabase Storage

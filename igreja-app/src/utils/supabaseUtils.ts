@@ -64,22 +64,44 @@ export interface SupabaseUserProfile {
 // Funções de Autenticação
 export const authSupabase = {
   async login(email: string, password: string) {
-    const { data: users, error } = await supabase
+    // Usar autenticação nativa do Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (!data.user) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    // Buscar dados adicionais do usuário na tabela customizada
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('email', email)
       .eq('status', 'Ativo')
       .single();
 
-    if (error || !users) {
-      throw new Error('Usuário não encontrado ou inativo');
+    if (userError || !userData) {
+      // Se não encontrar na tabela customizada, usar dados do auth
+      return {
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.name || data.user.email?.split('@')[0],
+          role: 'Membro'
+        },
+        token: data.session?.access_token
+      };
     }
 
-    // Nota: Em produção, a verificação de senha deve ser feita no backend
-    // Por enquanto, retornamos o usuário (assumindo que a senha está correta)
     return {
-      user: users,
-      token: `supabase_token_${users.id}` // Token simulado
+      user: userData,
+      token: data.session?.access_token
     };
   },
 
@@ -91,12 +113,33 @@ export const authSupabase = {
     cell_id?: string;
     oikos_name?: string;
   }) {
+    // Usar autenticação nativa do Supabase
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          name: userData.name,
+          phone: userData.phone
+        }
+      }
+    });
+
+    if (authError) {
+      throw new Error(authError.message);
+    }
+
+    if (!authData.user) {
+      throw new Error('Erro ao criar usuário');
+    }
+
+    // Criar registro na tabela customizada de usuários
     const { data, error } = await supabase
       .from('users')
       .insert({
+        id: authData.user.id, // Usar o ID do auth
         name: userData.name,
         email: userData.email,
-        password: userData.password, // Em produção, deve ser hasheada no backend
         phone: userData.phone,
         role: 'Membro',
         status: 'Ativo',
@@ -106,15 +149,16 @@ export const authSupabase = {
       .single();
 
     if (error) {
-      throw new Error(error.message);
+      // Se falhar ao criar na tabela customizada, ainda retorna o usuário do auth
+      console.warn('Erro ao criar registro customizado:', error.message);
     }
 
     // Se há oikos_name, criar perfil
-    if (userData.oikos_name && data) {
+    if (userData.oikos_name && authData.user) {
       await supabase
         .from('user_profiles')
         .insert({
-          user_id: data.id,
+          user_id: authData.user.id,
           oikos_name: userData.oikos_name
         });
     }
@@ -122,7 +166,16 @@ export const authSupabase = {
     return data;
   },
 
-  async getCurrentUser(userId: number) {
+  async getCurrentUser(userId?: string) {
+    // Se não foi passado userId, pegar da sessão atual
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+      userId = user.id;
+    }
+
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -130,7 +183,17 @@ export const authSupabase = {
       .single();
 
     if (error) {
-      throw new Error(error.message);
+      // Se não encontrar na tabela customizada, usar dados do auth
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.name || user.email?.split('@')[0],
+          role: 'Membro'
+        };
+      }
+      throw new Error('Usuário não encontrado');
     }
 
     return data;

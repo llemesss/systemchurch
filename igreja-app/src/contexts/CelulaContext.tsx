@@ -96,16 +96,14 @@ export const CelulaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   React.useEffect(() => {
     const loadPublicCells = async () => {
       try {
-        const response = await apiCall('/cells/public');
-        if (response.ok) {
-          const cellsData = await response.json();
-          const publicCells: Cell[] = cellsData.map((cell: any) => ({
-            id: cell.id,
-            cell_number: cell.cell_number || cell.name,
-            leader_1_id: cell.leader_id || '',
-          }));
-          setCells(publicCells);
-        }
+        const cellsData = await apiCall('/cells/public');
+        const publicCells: Cell[] = cellsData.map((cell: any) => ({
+          id: cell.id,
+          cell_number: cell.cell_number || cell.name,
+          leader_1_id: cell.leader_id || '',
+        }));
+        setCells(publicCells);
+        console.log('✅ CELULA DEBUG - Células públicas carregadas:', publicCells.length);
       } catch (error) {
         console.error('Erro ao carregar células públicas:', error);
       }
