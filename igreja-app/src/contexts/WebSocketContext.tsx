@@ -27,9 +27,9 @@ interface WebSocketProviderProps {
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const { user } = useAuth();
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState<any>(null);
+  const [socket] = useState<WebSocket | null>(null);
+  const [isConnected] = useState(false);
+  const [lastMessage] = useState<any>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -39,11 +39,13 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     if (!token) return;
 
     // TODO: Implementar com Supabase Realtime
-    // const wsUrl = `${WS_BASE_URL}/ws?token=${encodeURIComponent(token)}`;
+    // const wsUrl = `wss://localhost:3001/ws?token=${encodeURIComponent(token)}`;
     console.warn('WebSocket temporariamente desabilitado - implementar com Supabase Realtime');
     return;
-    const ws = new WebSocket(wsUrl);
+    
+    // const ws = new WebSocket(wsUrl);
 
+    /*
     ws.onopen = () => {
       console.log('WebSocket conectado');
       setIsConnected(true);
@@ -80,27 +82,28 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         ws.close();
       }
     };
+    */
   }, [user]);
 
-  const handleRedirect = (page: string) => {
-    toast.success(`Você foi direcionado para: ${page}`);
-    
-    // Mapear páginas para rotas
-    const pageRoutes: { [key: string]: string } = {
-      'Dashboard': '/dashboard',
-      'Células': '/celulas',
-      'Oração Diária': '/oracao-diaria',
-      'Configurações': '/configuracoes'
-    };
+  // const handleRedirect = (page: string) => {
+  //   toast.success(`Você foi direcionado para: ${page}`);
+  //   
+  //   // Mapear páginas para rotas
+  //   const pageRoutes: { [key: string]: string } = {
+  //     'Dashboard': '/dashboard',
+  //     'Células': '/celulas',
+  //     'Oração Diária': '/oracao-diaria',
+  //     'Configurações': '/configuracoes'
+  //   };
 
-    const route = pageRoutes[page];
-    if (route) {
-      // Usar setTimeout para garantir que o toast seja exibido antes do redirecionamento
-      setTimeout(() => {
-        window.location.href = route;
-      }, 1000);
-    }
-  };
+  //   const route = pageRoutes[page];
+  //   if (route) {
+  //     // Usar setTimeout para garantir que o toast seja exibido antes do redirecionamento
+  //     setTimeout(() => {
+  //       window.location.href = route;
+  //     }, 1000);
+  //   }
+  // };
 
   const sendRedirectCommand = (userId: string, page: string) => {
     if (socket && socket.readyState === WebSocket.OPEN) {

@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-import type { User, Cell, CellMember } from '../types/hierarchy';
+// Tipos importados conforme necessário
 
 // Tipos para Supabase
 export interface SupabaseUser {
@@ -518,7 +518,7 @@ export const profileSupabase = {
 export const healthSupabase = {
   async check() {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('users')
         .select('count')
         .limit(1);

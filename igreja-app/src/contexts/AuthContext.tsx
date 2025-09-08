@@ -35,7 +35,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               id: session.user.id,
               email: session.user.email || '',
               name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário',
-              role: 'Membro'
+              role: 'Membro',
+              memberSince: session.user.created_at || new Date().toISOString(),
+              isActive: true
             });
           }
         } else {
@@ -66,7 +68,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             id: session.user.id,
             email: session.user.email || '',
             name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário',
-            role: 'Membro'
+            role: 'Membro',
+            memberSince: session.user.created_at || new Date().toISOString(),
+            isActive: true
           });
         }
       } else if (event === 'SIGNED_OUT') {
@@ -77,7 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
     try {
@@ -95,14 +99,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Buscar dados adicionais do usuário
         try {
           const userData = await apiCallAuth('/auth/me');
-          setUser(userData);
+          // Garantir que o objeto de usuário tenha todas as propriedades necessárias
+          const completeUser = {
+            id: userData.id || data.user.id,
+            email: userData.email || data.user.email || '',
+            name: userData.name || data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
+            role: userData.role || 'Membro',
+            memberSince: userData.memberSince || userData.created_at || data.user.created_at || new Date().toISOString(),
+            isActive: userData.isActive !== undefined ? userData.isActive : (userData.status === 'Ativo' || true),
+            avatar: userData.avatar,
+            phone: userData.phone,
+            supervisor_id: userData.supervisor_id,
+            coordinator_id: userData.coordinator_id,
+            cell_id: userData.cell_id,
+            celulaNome: userData.celulaNome,
+            oikos_name: userData.oikos_name
+          };
+          setUser(completeUser);
         } catch (userError) {
           console.warn('Erro ao buscar dados do usuário, usando dados básicos:', userError);
           setUser({
             id: data.user.id,
             email: data.user.email || '',
             name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
-            role: 'Membro'
+            role: 'Membro',
+            memberSince: data.user.created_at || new Date().toISOString(),
+            isActive: true
           });
         }
         
@@ -147,8 +169,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (response.user) {
         // O Supabase já faz login automático após registro bem-sucedido
-        // Apenas definir o usuário no estado
-        setUser(response.user);
+        // Garantir que o objeto de usuário tenha todas as propriedades necessárias
+        const completeUser = {
+          id: response.user.id,
+          email: response.user.email || userData.email,
+          name: response.user.name || userData.name,
+          role: response.user.role || 'Membro',
+          memberSince: response.user.memberSince || response.user.created_at || new Date().toISOString(),
+          isActive: response.user.isActive !== undefined ? response.user.isActive : (response.user.status === 'Ativo' || true),
+          avatar: response.user.avatar,
+          phone: response.user.phone || userData.phone,
+          supervisor_id: response.user.supervisor_id,
+          coordinator_id: response.user.coordinator_id,
+          cell_id: response.user.cell_id || userData.cell_id,
+          celulaNome: response.user.celulaNome,
+          oikos_name: response.user.oikos_name || userData.oikos_name
+        };
+        setUser(completeUser);
         return true;
       }
       

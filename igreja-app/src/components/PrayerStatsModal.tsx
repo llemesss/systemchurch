@@ -68,7 +68,7 @@ const PrayerStatsModal: React.FC<PrayerStatsModalProps> = ({ member, isOpen, onC
     const data = await usersSupabase.getPrayerStats(parseInt(member.id));
 
       // Dados já obtidos do Supabase
-      setPrayerStats(data);
+      setPrayerStats(data as unknown as PrayerStats);
     } catch (error) {
       console.error('Erro ao carregar estatísticas de oração:', error);
       toast.error('Erro ao carregar estatísticas de oração');

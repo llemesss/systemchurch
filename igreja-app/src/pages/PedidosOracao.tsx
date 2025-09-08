@@ -81,19 +81,25 @@ const PedidosOracao: React.FC = () => {
       }
       
       // Usar Supabase através do utilitário de API
-      const { prayerRequestsSupabase } = await import('../utils/supabaseUtils');
+      const { apiCall } = await import('../utils/api');
       const userId = parseInt(token.replace('supabase_token_', ''));
       
       let response;
       if (editingRequest) {
-        response = await prayerRequestsSupabase.update(editingRequest.id, {
-          ...formData,
-          user_id: userId
+        response = await apiCall(`/prayer-requests/${editingRequest.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            ...formData,
+            user_id: userId
+          })
         });
       } else {
-        response = await prayerRequestsSupabase.create({
-          ...formData,
-          user_id: userId
+        response = await apiCall('/prayer-requests', {
+          method: 'POST',
+          body: JSON.stringify({
+            ...formData,
+            user_id: userId
+          })
         });
       }
       

@@ -23,16 +23,19 @@ const AtendimentoPastoral: React.FC = () => {
     
     try {
       // Usar Supabase através do utilitário de API
-      const { pastoralCareSupabase } = await import('../utils/supabaseUtils');
+      const { apiCall } = await import('../utils/api');
       
-      const response = await pastoralCareSupabase.create({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        subject: formData.subject,
-        message: formData.message,
-        urgency: formData.urgency,
-        preferred_contact: formData.preferredContact
+      const response = await apiCall('/pastoral-care', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+          urgency: formData.urgency,
+          preferred_contact: formData.preferredContact
+        })
       });
       
       // Dados já obtidos do Supabase

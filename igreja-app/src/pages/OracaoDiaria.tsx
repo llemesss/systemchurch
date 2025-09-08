@@ -34,7 +34,7 @@ const OracaoDiaria: React.FC = () => {
   
   // Estados para gerenciamento da página
   const [membrosCelula, setMembrosCelula] = useState<any[]>([]);
-  const [alreadyPrayed, setAlreadyPrayed] = useState(false);
+  const [hasPrayed, setHasPrayed] = useState(false);
   const [isLoadingPrayer, setIsLoadingPrayer] = useState(false);
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,12 +77,12 @@ const OracaoDiaria: React.FC = () => {
        const userId = parseInt(token.replace('supabase_token_', ''));
        const data = await prayersSupabase.logPrayer(userId);
       
-      setAlreadyPrayed(true);
+      setHasPrayed(true);
       console.log('✅ PRAYER LOG - Oração registrada:', data);
     } catch (error: any) {
       if (error.message?.includes('already prayed')) {
         // Usuário já orou hoje
-        setAlreadyPrayed(true);
+        setHasPrayed(true);
         console.log('⚠️ PRAYER LOG - Já orou hoje:', error);
       } else {
         console.error('❌ Erro ao registrar oração:', error);
@@ -115,11 +115,11 @@ const OracaoDiaria: React.FC = () => {
         // Atualiza os estados com os resultados
         // A API retorna { cell: {...}, members: [...] }, então precisamos acessar .members
         setMembrosCelula(dadosDosMembros.members || []);
-        setAlreadyPrayed(dadosStatusOracao.alreadyPrayed);
+        setHasPrayed(dadosStatusOracao.hasPrayed);
         
         console.log('✅ ORAÇÃO DEBUG - Dados carregados com sucesso');
         console.log('🔍 ORAÇÃO DEBUG - Membros:', dadosDosMembros);
-        console.log('🔍 ORAÇÃO DEBUG - Status oração:', dadosStatusOracao.alreadyPrayed);
+        console.log('🔍 ORAÇÃO DEBUG - Status oração:', dadosStatusOracao.hasPrayed);
 
       } catch (error) {
         console.error("Erro ao buscar dados da página:", error);
@@ -287,7 +287,7 @@ const OracaoDiaria: React.FC = () => {
 
       {/* Status da Oração */}
       <Box sx={{ my: 3, textAlign: 'center' }}>
-        {alreadyPrayed ? (
+        {hasPrayed ? (
           <Alert 
             severity="success" 
             icon={<CheckCircle />}

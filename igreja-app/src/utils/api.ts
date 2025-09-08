@@ -35,15 +35,15 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
       case endpoint === '/users' && method === 'POST':
         return await usersSupabase.create(body);
       
-      case endpoint.match(/^\/users\/\d+$/) && method === 'PUT':
+      case !!endpoint.match(/^\/users\/\d+$/) && method === 'PUT':
         const updateUserId = parseInt(endpoint.split('/')[2]);
         return await usersSupabase.update(updateUserId, body);
       
-      case endpoint.match(/^\/users\/\d+$/) && method === 'DELETE':
+      case !!endpoint.match(/^\/users\/\d+$/) && method === 'DELETE':
         const deleteUserId = parseInt(endpoint.split('/')[2]);
         return await usersSupabase.delete(deleteUserId);
       
-      case endpoint.match(/^\/users\/\d+\/prayer-stats$/):
+      case !!endpoint.match(/^\/users\/\d+\/prayer-stats$/):
         const statsUserId = parseInt(endpoint.split('/')[2]);
         return await usersSupabase.getPrayerStats(statsUserId);
       
@@ -57,39 +57,39 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
       case endpoint === '/cells' && method === 'POST':
         return await cellsSupabase.create(body);
       
-      case endpoint.match(/^\/cells\/\d+$/) && method === 'PUT':
+      case !!endpoint.match(/^\/cells\/\d+$/) && method === 'PUT':
         const updateCellId = parseInt(endpoint.split('/')[2]);
         return await cellsSupabase.update(updateCellId, body);
       
-      case endpoint.match(/^\/cells\/\d+$/) && method === 'DELETE':
+      case !!endpoint.match(/^\/cells\/\d+$/) && method === 'DELETE':
         const deleteCellId = parseInt(endpoint.split('/')[2]);
         return await cellsSupabase.delete(deleteCellId);
       
-      case endpoint.match(/^\/cells\/\d+\/members$/):
+      case !!endpoint.match(/^\/cells\/\d+\/members$/):
         const cellId = parseInt(endpoint.split('/')[2]);
         return await cellsSupabase.getMembers(cellId);
       
       // Orações
       case endpoint === '/prayers/log' && method === 'POST':
-        const prayerUserId = getCurrentUserId();
-        return await prayersSupabase.logPrayer(prayerUserId, body?.prayer_date);
+        const prayerUserId = await getCurrentUserId();
+        return await prayersSupabase.logPrayer(parseInt(prayerUserId), body?.prayer_date);
       
       case endpoint === '/prayers/status/today':
-        const statusUserId = getCurrentUserId();
-        return await prayersSupabase.getTodayStatus(statusUserId);
+        const statusUserId = await getCurrentUserId();
+        return await prayersSupabase.getTodayStatus(parseInt(statusUserId));
       
       // Perfil
       case endpoint === '/profile' && method === 'GET':
-        const profileUserId = getCurrentUserId();
-        return await profileSupabase.get(profileUserId);
+        const profileUserId = await getCurrentUserId();
+        return await profileSupabase.get(parseInt(profileUserId));
       
       case endpoint === '/profile' && method === 'PUT':
-        const updateProfileUserId = getCurrentUserId();
-        return await profileSupabase.update(updateProfileUserId, body);
+        const updateProfileUserId = await getCurrentUserId();
+        return await profileSupabase.update(parseInt(updateProfileUserId), body);
       
       case endpoint === '/profile/complete' && method === 'POST':
-        const completeUserId = getCurrentUserId();
-        return await profileSupabase.complete(completeUserId, body);
+        const completeUserId = await getCurrentUserId();
+        return await profileSupabase.complete(parseInt(completeUserId), body);
       
       // Health Check
       case endpoint === '/health':
