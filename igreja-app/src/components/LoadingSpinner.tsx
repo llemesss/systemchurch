@@ -1,16 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { RefreshCw } from 'lucide-react';
 
 interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
   message?: string;
   fullScreen?: boolean;
+  timeout?: number; // Timeout em milissegundos
+  onTimeout?: () => void;
+  onRetry?: () => void;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
   size = 'medium', 
   message = 'Carregando...', 
-  fullScreen = true 
+  fullScreen = true,
+  timeout = 15000, // 15 segundos por padrão
+  onTimeout,
+  onRetry
 }) => {
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    if (timeout <= 0) return;
+
+    const startTime = Date.now();
+    
+    // Timer para atualizar o tempo decorrido
+    const elapsedTimer = setInterval(() => {
+      setElapsedTime(Date.now() - startTime);
+    }, 1000);
+
+    // Timer para timeout
+    const timeoutTimer = setTimeout(() => {
+      setHasTimedOut(true);
+      onTimeout?.();
+    }, timeout);
+
+    return () => {
+      clearInterval(elapsedTimer);
+      clearTimeout(timeoutTimer);
+    };
+  }, [timeout, onTimeout]);
+
+  const handleRetry = () => {
+    setHasTimedOut(false);
+    setElapsedTime(0);
+    onRetry?.();
+  };
   const getSizeClasses = () => {
     switch (size) {
       case 'small':
@@ -21,6 +58,48 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         return 'w-10 h-10';
     }
   };
+
+  // Mostrar interface de timeout se necessário
+  if (hasTimedOut) {
+    const timeoutContent = (
+      <div className="flex flex-col items-center justify-center max-w-md mx-auto">
+        <div className="w-16 h-16 mb-4 text-red-400">
+          <RefreshCw className="w-full h-full" />
+        </div>
+        <h3 className="text-xl font-semibold text-white mb-2">
+          Conexão Lenta
+        </h3>
+        <p className="text-white/80 text-center mb-6">
+          A conexão está demorando muito para responder. Por favor, verifique sua internet e tente novamente.
+        </p>
+        {onRetry && (
+          <button
+            onClick={handleRetry}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Tentar Novamente
+          </button>
+        )}
+        <p className="text-white/60 text-sm mt-4">
+          Ou atualize a página manualmente
+        </p>
+      </div>
+    );
+
+    if (fullScreen) {
+      return (
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 flex items-center justify-center z-50">
+          {timeoutContent}
+        </div>
+      );
+    }
+    return timeoutContent;
+  }
+
+  // Mostrar tempo decorrido se estiver demorando
+  const showElapsedTime = elapsedTime > 5000; // Mostrar após 5 segundos
+  const seconds = Math.floor(elapsedTime / 1000);
 
   const spinner = (
     <div className="flex flex-col items-center justify-center">
@@ -43,6 +122,16 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       </div>
       {message && (
         <p className="mt-4 text-white/80 text-sm font-medium">{message}</p>
+      )}
+      {showElapsedTime && (
+        <p className="mt-2 text-white/60 text-xs">
+          Carregando há {seconds} segundos...
+        </p>
+      )}
+      {elapsedTime > 10000 && (
+        <p className="mt-2 text-yellow-400 text-xs text-center max-w-xs">
+          A conexão está mais lenta que o normal. Aguarde ou atualize a página.
+        </p>
       )}
     </div>
   );

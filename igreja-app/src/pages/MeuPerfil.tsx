@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCelula } from '../contexts/CelulaContext';
 import { apiCall, ENDPOINTS } from '../utils/api';
+import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import {
   Container,
@@ -66,6 +67,7 @@ const MeuPerfil: React.FC = () => {
   const { user } = useAuth();
   const { cells } = useCelula();
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [dependentModalOpen, setDependentModalOpen] = useState(false);
   const [dependents, setDependents] = useState<Dependent[]>([]);
   const [newDependent, setNewDependent] = useState<Dependent>({
@@ -175,6 +177,9 @@ const MeuPerfil: React.FC = () => {
           setProfileData(prev => ({ ...prev, ...mappedData }));
       } catch (error) {
         console.error('Erro ao carregar perfil:', error);
+        toast.error('Erro ao carregar dados do perfil');
+      } finally {
+        setInitialLoading(false);
       }
     };
 
@@ -263,6 +268,22 @@ const MeuPerfil: React.FC = () => {
 
   // Encontrar célula do usuário
   const userCell = cells?.find(cell => cell.id === user?.cell_id);
+
+  // Mostrar loading spinner durante carregamento inicial
+  if (initialLoading) {
+    return (
+      <LoadingSpinner 
+        message="Carregando dados do perfil..."
+        timeout={15000}
+        onTimeout={() => {
+          console.warn('Timeout ao carregar perfil completo');
+        }}
+        onRetry={() => {
+          window.location.reload();
+        }}
+      />
+    );
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

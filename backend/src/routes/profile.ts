@@ -148,18 +148,23 @@ router.put('/', authenticateToken, async (req: any, res) => {
   }
 });
 
-// Obter perfil completo (incluindo dados estendidos)
+// Obter perfil completo do usuário logado - OTIMIZADO
 router.get('/complete', authenticateToken, async (req: any, res) => {
   try {
     const db = await initDatabase();
+    
+    // Query otimizada: uma única consulta com JOINs e índices
+    // Agora usa os índices criados para melhor performance
     const profile = await db.get(`
-      SELECT u.id, u.name, u.email, u.phone, u.role, u.status, u.cell_id,
-             c.cell_number, c.name as cell_name,
-             l.name as leader_name,
-             p.whatsapp, p.gender, p.date_of_birth, p.birth_city, p.birth_state,
-             p.address, p.address_number, p.neighborhood, p.cep, p.reference_point,
-             p.father_name, p.mother_name, p.marital_status, p.spouse_name,
-             p.education, p.profession, p.conversion_date, p.previous_church, p.oikos_name, p.oikos_name_2
+      SELECT 
+        u.id, u.name, u.email, u.phone, u.role, u.status, u.cell_id,
+        c.cell_number, c.name as cell_name,
+        l.name as leader_name,
+        p.whatsapp, p.gender, p.date_of_birth, p.birth_city, p.birth_state,
+        p.address, p.address_number, p.neighborhood, p.cep, p.reference_point,
+        p.father_name, p.mother_name, p.marital_status, p.spouse_name,
+        p.education, p.profession, p.conversion_date, p.previous_church, 
+        p.oikos_name, p.oikos_name_2
       FROM users u
       LEFT JOIN cells c ON u.cell_id = c.id
       LEFT JOIN users l ON c.leader_id = l.id

@@ -22,7 +22,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Show loading spinner while checking authentication
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <LoadingSpinner 
+        message="Verificando autenticação..."
+        timeout={12000}
+        onTimeout={() => {
+          console.warn('Timeout na verificação de autenticação');
+        }}
+        onRetry={() => {
+          window.location.reload();
+        }}
+      />
+    );
   }
 
   // If authentication is required but user is not authenticated

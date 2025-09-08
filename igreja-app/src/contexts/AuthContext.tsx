@@ -19,9 +19,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const checkSupabaseAuth = async () => {
       try {
-        // Timeout para evitar carregamento infinito
+        // Timeout reduzido para evitar carregamento infinito
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout na verificação de autenticação')), 10000)
+          setTimeout(() => reject(new Error('A conexão está demorando muito para responder. Por favor, atualize a página e tente novamente.')), 8000)
         );
         
         const authPromise = supabase.auth.getSession();
@@ -30,11 +30,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.log('🔍 AUTH DEBUG - Sessão encontrada:', !!session);
         
         if (session?.user) {
-          // Buscar dados adicionais do usuário
+          // Buscar dados adicionais do usuário com timeout menor
           try {
             const userDataPromise = apiCallAuth('/auth/me');
             const userTimeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout ao buscar dados do usuário')), 5000)
+              setTimeout(() => reject(new Error('Timeout ao carregar perfil do usuário')), 4000)
             );
             
             const response = await Promise.race([userDataPromise, userTimeoutPromise]);
@@ -42,6 +42,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser(response);
           } catch (error) {
             console.warn('⚠️ AUTH DEBUG - Erro ao buscar dados do usuário, usando dados básicos:', error);
+            
+            // Mostrar toast de erro se for timeout
+            if (error instanceof Error && error.message.includes('Timeout')) {
+              // Importar toast dinamicamente para evitar problemas de dependência
+              import('react-hot-toast').then(({ default: toast }) => {
+                toast.error('A conexão está lenta. Alguns dados podem não estar atualizados.', {
+                  duration: 5000,
+                  position: 'top-center'
+                });
+              });
+            }
+            
             // Usar dados básicos do auth se não conseguir buscar da tabela customizada
             setUser({
               id: session.user.id,
@@ -58,6 +70,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       } catch (error) {
         console.error('❌ AUTH DEBUG - Erro na verificação da sessão:', error);
+        
+        // Mostrar mensagem de erro específica para timeout
+        if (error instanceof Error && error.message.includes('conexão está demorando')) {
+          // Importar toast dinamicamente
+          import('react-hot-toast').then(({ default: toast }) => {
+            toast.error(error.message, {
+              duration: 8000,
+              position: 'top-center'
+            });
+          });
+        }
+        
         // Em caso de timeout ou erro, definir como não autenticado
         setUser(null);
       } finally {
