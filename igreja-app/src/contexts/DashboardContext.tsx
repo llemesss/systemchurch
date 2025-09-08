@@ -150,8 +150,8 @@ export const DashboardProvider: React.FC<{ children: ReactNode }> = ({ children 
           break;
 
         case 'Membro':
-          const memberUsers = await apiCall('/users');
-          const memberCells = await apiCall('/cells');
+          const memberUsers = await apiCallDashboard('/users');
+          const memberCells = await apiCallDashboard('/cells');
           
           const memberCell = memberCells.find((c: any) => c.id === user.cell_id);
           const cellLeader = memberUsers.find((u: any) => u.id === memberCell?.leader_id);

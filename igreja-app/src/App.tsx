@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CelulaProvider } from './contexts/CelulaContext';
 import { UserManagementProvider } from './contexts/UserManagementContext';
@@ -8,23 +8,26 @@ import { DashboardProvider } from './contexts/DashboardContext';
 import { WebSocketProvider } from './contexts/WebSocketContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
-import LandingPage from './pages/LandingPage';
-import Dashboard from './pages/Dashboard';
-import LoginPage from './pages/LoginPage';
-import PalavraPastor from './pages/PalavraPastor';
-import AtendimentoPastoral from './pages/AtendimentoPastoral';
-import CultosEventos from './pages/CultosEventos';
-import PedidosOracao from './pages/PedidosOracao';
-import Ofertar from './pages/Ofertar';
-import OracaoDiaria from './pages/OracaoDiaria';
-import AdminPanel from './pages/AdminPanel';
-import LeaderDashboard from './pages/LeaderDashboard';
-import RegisterPage from './pages/RegisterPage';
-import PastorPanel from './pages/PastorPanel';
-import ConditionalDashboard from './pages/ConditionalDashboard';
-import CellDetails from './pages/CellDetails';
-import MeuPerfil from './pages/MeuPerfil';
+import LoadingSpinner from './components/LoadingSpinner';
 import './styles/globals.css';
+
+// Lazy load pages for code splitting
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const PalavraPastor = lazy(() => import('./pages/PalavraPastor'));
+const AtendimentoPastoral = lazy(() => import('./pages/AtendimentoPastoral'));
+const CultosEventos = lazy(() => import('./pages/CultosEventos'));
+const PedidosOracao = lazy(() => import('./pages/PedidosOracao'));
+const Ofertar = lazy(() => import('./pages/Ofertar'));
+const OracaoDiaria = lazy(() => import('./pages/OracaoDiaria'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const LeaderDashboard = lazy(() => import('./pages/LeaderDashboard'));
+const PastorPanel = lazy(() => import('./pages/PastorPanel'));
+const ConditionalDashboard = lazy(() => import('./pages/ConditionalDashboard'));
+const CellDetails = lazy(() => import('./pages/CellDetails'));
+const MeuPerfil = lazy(() => import('./pages/MeuPerfil'));}]},{"old_str":
 
 // Componente interno que tem acesso ao contexto de autenticação
 function AppRoutes() {
@@ -45,7 +48,8 @@ function AppRoutes() {
 
   return (
     <div className="App">
-      <Routes>
+      <Suspense fallback={<LoadingSpinner message="Carregando página..." />}>
+        <Routes>
             {/* Public routes */}
             <Route path="/" element={<LandingPage />} />
             <Route 
@@ -116,6 +120,7 @@ function AppRoutes() {
             {/* Default route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+        </Suspense>
         </div>
   );
 }
