@@ -27,7 +27,7 @@ const LeaderDashboard = lazy(() => import('./pages/LeaderDashboard'));
 const PastorPanel = lazy(() => import('./pages/PastorPanel'));
 const ConditionalDashboard = lazy(() => import('./pages/ConditionalDashboard'));
 const CellDetails = lazy(() => import('./pages/CellDetails'));
-const MeuPerfil = lazy(() => import('./pages/MeuPerfil'));}]},{"old_str":
+const MeuPerfil = lazy(() => import('./pages/MeuPerfil'));
 
 // Componente interno que tem acesso ao contexto de autenticação
 function AppRoutes() {
