@@ -12,105 +12,109 @@ const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Estado inicial correto: usuário null, carregamento true
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Check for Supabase authentication on component mount
+  // Verificação de sessão robusta no useEffect
   useEffect(() => {
-    const checkSupabaseAuth = async () => {
+    const verificarSessaoAtiva = async () => {
       try {
-        // Timeout reduzido para evitar carregamento infinito
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('A conexão está demorando muito para responder. Por favor, atualize a página e tente novamente.')), 8000)
-        );
-        
-        const authPromise = supabase.auth.getSession();
-        
-        const { data: { session } } = await Promise.race([authPromise, timeoutPromise]) as any;
-        console.log('🔍 AUTH DEBUG - Sessão encontrada:', !!session);
-        
-        if (session?.user) {
-          // Buscar dados adicionais do usuário com timeout menor
-          try {
-            const userDataPromise = apiCallAuth('/auth/me');
-            const userTimeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Timeout ao carregar perfil do usuário')), 4000)
-            );
-            
-            const response = await Promise.race([userDataPromise, userTimeoutPromise]);
-            console.log('🔍 AUTH DEBUG - Usuário carregado:', response);
-            setUser(response);
-          } catch (error) {
-            console.warn('⚠️ AUTH DEBUG - Erro ao buscar dados do usuário, usando dados básicos:', error);
-            
-            // Mostrar toast de erro se for timeout
-            if (error instanceof Error && error.message.includes('Timeout')) {
-              // Importar toast dinamicamente para evitar problemas de dependência
-              import('react-hot-toast').then(({ default: toast }) => {
-                toast.error('A conexão está lenta. Alguns dados podem não estar atualizados.', {
-                  duration: 5000,
-                  position: 'top-center'
-                });
-              });
-            }
-            
-            // Usar dados básicos do auth se não conseguir buscar da tabela customizada
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário',
-              role: 'Membro',
-              memberSince: session.user.created_at || new Date().toISOString(),
-              isActive: true
-            });
+        // 1. Tenta buscar a sessão do Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 AUTH DEBUG - Verificando sessão:', !!session);
+
+        if (session) {
+          // 2. SÓ SE a sessão for VÁLIDA, busca os dados do usuário na nossa tabela 'users'
+          const { data: dadosDoUsuario, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (error || !dadosDoUsuario) {
+            throw new Error("Usuário da sessão não encontrado na base de dados.");
           }
+
+          // 3. SÓ AGORA define o estado como autenticado com os dados completos
+          const usuarioCompleto: User = {
+            id: dadosDoUsuario.id,
+            email: dadosDoUsuario.email,
+            name: dadosDoUsuario.name,
+            role: dadosDoUsuario.role || 'Membro',
+            memberSince: dadosDoUsuario.created_at || dadosDoUsuario.member_since,
+            isActive: dadosDoUsuario.status === 'Ativo' || dadosDoUsuario.is_active,
+            avatar: dadosDoUsuario.avatar,
+            phone: dadosDoUsuario.phone,
+            supervisor_id: dadosDoUsuario.supervisor_id,
+            coordinator_id: dadosDoUsuario.coordinator_id,
+            cell_id: dadosDoUsuario.cell_id,
+            celulaNome: dadosDoUsuario.cell_name,
+            oikos_name: dadosDoUsuario.oikos_name
+          };
+          
+          setUser(usuarioCompleto);
+          console.log('✅ AUTH DEBUG - Usuário autenticado com sucesso:', usuarioCompleto.name);
         } else {
-          console.log('❌ AUTH DEBUG - Nenhuma sessão encontrada');
+          // 4. Se não houver sessão, explicitamente define como não autenticado
+          console.log('❌ AUTH DEBUG - Nenhuma sessão válida encontrada');
           setUser(null);
         }
       } catch (error) {
-        console.error('❌ AUTH DEBUG - Erro na verificação da sessão:', error);
-        
-        // Mostrar mensagem de erro específica para timeout
-        if (error instanceof Error && error.message.includes('conexão está demorando')) {
-          // Importar toast dinamicamente
-          import('react-hot-toast').then(({ default: toast }) => {
-            toast.error(error.message, {
-              duration: 8000,
-              position: 'top-center'
-            });
-          });
-        }
-        
-        // Em caso de timeout ou erro, definir como não autenticado
+        console.error('❌ AUTH DEBUG - Sessão inválida ou erro:', error);
         setUser(null);
       } finally {
+        // 5. Termina o carregamento inicial, aconteça o que acontecer
         setIsLoading(false);
       }
     };
 
-    checkSupabaseAuth();
+    verificarSessaoAtiva();
 
-    // Listener para mudanças de autenticação
+    // Listener para mudanças de autenticação com lógica segura
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('🔍 AUTH DEBUG - Mudança de estado:', event, !!session);
       
       if (event === 'SIGNED_IN' && session?.user) {
         try {
-          const response = await apiCallAuth('/auth/me');
-          setUser(response);
+          // Aplicar a mesma lógica segura: buscar dados na tabela users
+          const { data: dadosDoUsuario, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (error || !dadosDoUsuario) {
+            console.error('❌ AUTH DEBUG - Usuário não encontrado na base de dados após login:', error);
+            setUser(null);
+            return;
+          }
+
+          // Só define como autenticado se encontrou os dados completos
+          const usuarioCompleto: User = {
+            id: dadosDoUsuario.id,
+            email: dadosDoUsuario.email,
+            name: dadosDoUsuario.name,
+            role: dadosDoUsuario.role || 'Membro',
+            memberSince: dadosDoUsuario.created_at || dadosDoUsuario.member_since,
+            isActive: dadosDoUsuario.status === 'Ativo' || dadosDoUsuario.is_active,
+            avatar: dadosDoUsuario.avatar,
+            phone: dadosDoUsuario.phone,
+            supervisor_id: dadosDoUsuario.supervisor_id,
+            coordinator_id: dadosDoUsuario.coordinator_id,
+            cell_id: dadosDoUsuario.cell_id,
+            celulaNome: dadosDoUsuario.cell_name,
+            oikos_name: dadosDoUsuario.oikos_name
+          };
+          
+          setUser(usuarioCompleto);
+          console.log('✅ AUTH DEBUG - Login realizado com sucesso:', usuarioCompleto.name);
         } catch (error) {
-          console.warn('⚠️ AUTH DEBUG - Erro ao buscar dados do usuário:', error);
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Usuário',
-            role: 'Membro',
-            memberSince: session.user.created_at || new Date().toISOString(),
-            isActive: true
-          });
+          console.error('❌ AUTH DEBUG - Erro ao processar login:', error);
+          setUser(null);
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log('🔍 AUTH DEBUG - Logout realizado');
         setUser(null);
       }
     });
@@ -128,49 +132,57 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       
       if (error) {
-        console.error('Login error:', error.message);
+        console.error('❌ AUTH DEBUG - Erro no login:', error.message);
         return false;
       }
       
       if (data.user) {
-        // Buscar dados adicionais do usuário
+        // Aplicar lógica segura: buscar dados na tabela users
         try {
-          const userData = await apiCallAuth('/profile');
-          // Garantir que o objeto de usuário tenha todas as propriedades necessárias
-          const completeUser = {
-            id: userData.id || data.user.id,
-            email: userData.email || data.user.email || '',
-            name: userData.name || data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
-            role: userData.role || 'Membro',
-            memberSince: userData.memberSince || userData.created_at || data.user.created_at || new Date().toISOString(),
-            isActive: userData.isActive !== undefined ? userData.isActive : (userData.status === 'Ativo' || true),
-            avatar: userData.avatar,
-            phone: userData.phone,
-            supervisor_id: userData.supervisor_id,
-            coordinator_id: userData.coordinator_id,
-            cell_id: userData.cell_id,
-            celulaNome: userData.cell_name,
-            oikos_name: userData.oikos_name
+          const { data: dadosDoUsuario, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+
+          if (userError || !dadosDoUsuario) {
+            console.error('❌ AUTH DEBUG - Usuário não encontrado na base de dados:', userError);
+            // Fazer logout se não encontrar o usuário na tabela
+            await supabase.auth.signOut();
+            return false;
+          }
+
+          // Só define como autenticado se encontrou os dados completos
+          const usuarioCompleto: User = {
+            id: dadosDoUsuario.id,
+            email: dadosDoUsuario.email,
+            name: dadosDoUsuario.name,
+            role: dadosDoUsuario.role || 'Membro',
+            memberSince: dadosDoUsuario.created_at || dadosDoUsuario.member_since,
+            isActive: dadosDoUsuario.status === 'Ativo' || dadosDoUsuario.is_active,
+            avatar: dadosDoUsuario.avatar,
+            phone: dadosDoUsuario.phone,
+            supervisor_id: dadosDoUsuario.supervisor_id,
+            coordinator_id: dadosDoUsuario.coordinator_id,
+            cell_id: dadosDoUsuario.cell_id,
+            celulaNome: dadosDoUsuario.cell_name,
+            oikos_name: dadosDoUsuario.oikos_name
           };
-          setUser(completeUser);
+          
+          setUser(usuarioCompleto);
+          console.log('✅ AUTH DEBUG - Login bem-sucedido:', usuarioCompleto.name);
+          return true;
         } catch (userError) {
-          console.warn('Erro ao buscar dados do usuário, usando dados básicos:', userError);
-          setUser({
-            id: data.user.id,
-            email: data.user.email || '',
-            name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Usuário',
-            role: 'Membro',
-            memberSince: data.user.created_at || new Date().toISOString(),
-            isActive: true
-          });
+          console.error('❌ AUTH DEBUG - Erro ao buscar dados do usuário:', userError);
+          // Fazer logout em caso de erro
+          await supabase.auth.signOut();
+          return false;
         }
-        
-        return true;
       }
       
       return false;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ AUTH DEBUG - Erro geral no login:', error);
       return false;
     } finally {
       setIsLoading(false);
@@ -217,30 +229,52 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       
       if (response.user) {
-        // O Supabase já faz login automático após registro bem-sucedido
-        // Garantir que o objeto de usuário tenha todas as propriedades necessárias
-        const completeUser = {
-          id: response.user.id,
-          email: response.user.email || userData.email,
-          name: response.user.name || userData.name,
-          role: response.user.role || 'Membro',
-          memberSince: response.user.memberSince || response.user.created_at || new Date().toISOString(),
-          isActive: response.user.isActive !== undefined ? response.user.isActive : (response.user.status === 'Ativo' || true),
-          avatar: response.user.avatar,
-          phone: response.user.phone || userData.phone,
-          supervisor_id: response.user.supervisor_id,
-          coordinator_id: response.user.coordinator_id,
-          cell_id: response.user.cell_id || userData.cell_id,
-          celulaNome: response.user.celulaNome,
-          oikos_name: response.user.oikos_name || userData.oikos_name
-        };
-        setUser(completeUser);
-        return true;
+        // Aplicar lógica segura: verificar se o usuário foi criado na tabela
+        try {
+          const { data: dadosDoUsuario, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', response.user.id)
+            .single();
+
+          if (userError || !dadosDoUsuario) {
+            console.error('❌ AUTH DEBUG - Usuário registrado não encontrado na base de dados:', userError);
+            // Fazer logout se não encontrar o usuário na tabela
+            await supabase.auth.signOut();
+            return false;
+          }
+
+          // Só define como autenticado se encontrou os dados completos
+          const usuarioCompleto: User = {
+            id: dadosDoUsuario.id,
+            email: dadosDoUsuario.email,
+            name: dadosDoUsuario.name,
+            role: dadosDoUsuario.role || 'Membro',
+            memberSince: dadosDoUsuario.created_at || dadosDoUsuario.member_since,
+            isActive: dadosDoUsuario.status === 'Ativo' || dadosDoUsuario.is_active,
+            avatar: dadosDoUsuario.avatar,
+            phone: dadosDoUsuario.phone,
+            supervisor_id: dadosDoUsuario.supervisor_id,
+            coordinator_id: dadosDoUsuario.coordinator_id,
+            cell_id: dadosDoUsuario.cell_id,
+            celulaNome: dadosDoUsuario.cell_name,
+            oikos_name: dadosDoUsuario.oikos_name
+          };
+          
+          setUser(usuarioCompleto);
+          console.log('✅ AUTH DEBUG - Registro bem-sucedido:', usuarioCompleto.name);
+          return true;
+        } catch (userError) {
+          console.error('❌ AUTH DEBUG - Erro ao verificar usuário registrado:', userError);
+          // Fazer logout em caso de erro
+          await supabase.auth.signOut();
+          return false;
+        }
       }
       
       return false;
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('❌ AUTH DEBUG - Erro geral no registro:', error);
       return false;
     } finally {
       setIsLoading(false);
