@@ -1,6 +1,27 @@
 # 🔧 Guia de Implementação do Trigger Automático - Supabase
 
-## 🚨 Problema Identificado
+## ⚠️ **SOLUÇÃO PARA DEPENDÊNCIAS E RECRIAÇÃO COMPLETA**
+
+**A alteração da coluna falhou devido a dependências. Solução: Remover dependências e recriar a tabela.**
+
+### 🚨 Problema Identificado
+Ao tentar executar `DROP TABLE public.users`, o Supabase retorna erro indicando que existem dependências (chaves estrangeiras) de outras tabelas que impedem a remoção.
+
+### 🔧 Solução Definitiva
+**Execute o arquivo:** `drop_dependencies_and_recreate.sql`
+
+Este arquivo resolve o problema das dependências:
+1. **REMOÇÃO** de todas as chaves estrangeiras que referenciam `public.users`
+2. **REMOÇÃO** do trigger e função existentes
+3. **DROP** da tabela antiga `public.users`
+4. **CREATE** da nova tabela com `id UUID` e chave estrangeira para `auth.users`
+5. **RECRIAÇÃO** da função `handle_new_user()` e trigger `on_auth_user_created`
+6. **REINSERÇÃO** dos usuários existentes com UUIDs corretos
+7. **VERIFICAÇÕES** completas de estrutura e funcionamento
+
+---
+
+## 🚨 Problema Principal
 Novos usuários são autenticados pelo Supabase, mas **não são encontrados na tabela `public.users`**, causando falha no login.
 
 ## ✅ Solução: Trigger Automático
@@ -133,6 +154,46 @@ LIMIT 10;
 
 ---
 
+## 🔄 Sincronização de Usuários Existentes
+
+**IMPORTANTE**: Usuários criados ANTES da implementação do trigger precisam ser sincronizados manualmente.
+
+### Passo 1: Obter UUIDs dos Usuários
+1. Acesse o painel do Supabase
+2. Vá para "Authentication" > "Users"
+3. Copie o ID (UUID) de cada usuário existente
+
+### Passo 2: Executar Sincronização
+Use o arquivo `sync_existing_users.sql` criado no projeto:
+
+```sql
+INSERT INTO public.users (id, email, name, role, status, created_at, updated_at)
+VALUES 
+  ('COLE_O_UUID_DO_PASTOR_AQUI', 'pastor@igreja.com', 'Pastor Principal', 'Pastor', 'active', NOW(), NOW()),
+  ('COLE_O_UUID_DO_ADMIN_AQUI', 'admin@igreja.com', 'Administrador', 'Admin', 'active', NOW(), NOW()),
+  ('COLE_O_UUID_DO_IGOR_AQUI', 'igor@idpb.org', 'Igor', 'Líder', 'active', NOW(), NOW())
+ON CONFLICT (id) DO NOTHING;
+```
+
+### Verificação da Sincronização
+```sql
+SELECT id, email, name, role, status, created_at
+FROM public.users 
+WHERE email IN ('pastor@igreja.com', 'admin@igreja.com', 'igor@idpb.org')
+ORDER BY created_at;
+```
+
+## 🔍 Próximos Passos
+
+1. **Obter UUIDs dos usuários existentes** no painel Authentication do Supabase
+2. **Substituir placeholders** no arquivo `drop_dependencies_and_recreate.sql`:
+   - `UUID_DO_PASTOR` → UUID real do pastor
+   - `UUID_DO_ADMIN` → UUID real do admin
+   - `UUID_DO_IGOR` → UUID real do Igor
+3. **Executar `drop_dependencies_and_recreate.sql`** completo no SQL Editor do Supabase
+4. **Verificar resultados** das consultas de verificação incluídas no arquivo
+5. **Testar** login de usuários existentes e registro de novos usuários
+
 ## 📞 Suporte
 
 Se encontrar problemas:
@@ -140,5 +201,13 @@ Se encontrar problemas:
 2. Confirme se a tabela `public.users` tem as colunas corretas
 3. Teste com um novo email (não use emails já registrados)
 4. Verifique os logs do Supabase para possíveis erros
+
+## ⚠️ Observações Importantes
+
+- **Backup**: Sempre faça backup antes de executar comandos em produção
+- **Testes**: Teste primeiro em ambiente de desenvolvimento
+- **Sincronização**: Execute a sincronização de usuários existentes APENAS UMA VEZ
+- **Monitoramento**: Acompanhe os logs após a implementação
+- **Rollback**: Tenha um plano de rollback caso algo dê errado
 
 **Arquivo SQL completo:** `supabase_trigger_setup.sql`

@@ -19,52 +19,55 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Verificação de sessão robusta no useEffect
   useEffect(() => {
     const verificarSessaoAtiva = async () => {
+      console.log("📋 PASSO 1: Iniciando verificação da sessão...");
+      setIsLoading(true);
       try {
-        // 1. Tenta buscar a sessão do Supabase
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('🔍 AUTH DEBUG - Verificando sessão:', !!session);
 
         if (session) {
-          // 2. SÓ SE a sessão for VÁLIDA, busca os dados do usuário na nossa tabela 'users'
+          console.log("📋 PASSO 2: Sessão encontrada no Supabase Auth. ID do usuário:", session.user.id);
+          
           const { data: dadosDoUsuario, error } = await supabase
             .from('users')
             .select('*')
             .eq('id', session.user.id)
             .single();
-
-          if (error || !dadosDoUsuario) {
-            throw new Error("Usuário da sessão não encontrado na base de dados.");
+          
+          if (error) {
+            console.error("📋 PASSO 3a (ERRO): Usuário não encontrado na tabela 'public.users'.", error);
+            throw new Error("Usuário da sessão não encontrado.");
           }
 
-          // 3. SÓ AGORA define o estado como autenticado com os dados completos
-          const usuarioCompleto: User = {
-            id: dadosDoUsuario.id,
-            email: dadosDoUsuario.email,
-            name: dadosDoUsuario.name,
-            role: dadosDoUsuario.role || 'Membro',
-            memberSince: dadosDoUsuario.created_at || dadosDoUsuario.member_since,
-            isActive: dadosDoUsuario.status === 'Ativo' || dadosDoUsuario.is_active,
-            avatar: dadosDoUsuario.avatar,
-            phone: dadosDoUsuario.phone,
-            supervisor_id: dadosDoUsuario.supervisor_id,
-            coordinator_id: dadosDoUsuario.coordinator_id,
-            cell_id: dadosDoUsuario.cell_id,
-            celulaNome: dadosDoUsuario.cell_name,
-            oikos_name: dadosDoUsuario.oikos_name
-          };
-          
-          setUser(usuarioCompleto);
-          console.log('✅ AUTH DEBUG - Usuário autenticado com sucesso:', usuarioCompleto.name);
+          if (dadosDoUsuario) {
+            console.log("📋 PASSO 3b (SUCESSO): Dados do usuário encontrados na tabela 'public.users'.", dadosDoUsuario);
+            
+            const usuarioCompleto: User = {
+              id: dadosDoUsuario.id,
+              email: dadosDoUsuario.email,
+              name: dadosDoUsuario.name,
+              role: dadosDoUsuario.role || 'Membro',
+              memberSince: dadosDoUsuario.created_at || dadosDoUsuario.member_since,
+              isActive: dadosDoUsuario.status === 'Ativo' || dadosDoUsuario.is_active,
+              avatar: dadosDoUsuario.avatar,
+              phone: dadosDoUsuario.phone,
+              supervisor_id: dadosDoUsuario.supervisor_id,
+              coordinator_id: dadosDoUsuario.coordinator_id,
+              cell_id: dadosDoUsuario.cell_id,
+              celulaNome: dadosDoUsuario.cell_name,
+              oikos_name: dadosDoUsuario.oikos_name
+            };
+            
+            setUser(usuarioCompleto);
+          }
         } else {
-          // 4. Se não houver sessão, explicitamente define como não autenticado
-          console.log('❌ AUTH DEBUG - Nenhuma sessão válida encontrada');
+          console.log("📋 PASSO 2 (INFO): Nenhuma sessão ativa encontrada.");
           setUser(null);
         }
       } catch (error) {
-        console.error('❌ AUTH DEBUG - Sessão inválida ou erro:', error);
+        console.error("ERRO GERAL no bloco de verificação de sessão:", error);
         setUser(null);
       } finally {
-        // 5. Termina o carregamento inicial, aconteça o que acontecer
+        console.log("📋 PASSO 4: Finalizando verificação. isLoading será 'false'.");
         setIsLoading(false);
       }
     };

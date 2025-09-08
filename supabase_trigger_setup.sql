@@ -1,14 +1,12 @@
 -- =====================================================
--- SETUP DE TRIGGER AUTOMÁTICO PARA CRIAÇÃO DE USUÁRIOS
+-- CONFIGURAÇÃO DO TRIGGER PARA NOVOS USUÁRIOS
 -- =====================================================
 -- Este arquivo contém os comandos SQL necessários para
 -- automatizar a criação de perfis de usuário na tabela
--- public.users quando um novo usuário se registra.
+-- public.users quando novos usuários se registram no Supabase.
 --
--- INSTRUÇÕES:
--- 1. Acesse o painel do Supabase
--- 2. Vá para SQL Editor
--- 3. Execute os comandos abaixo na ordem
+-- ⚠️ IMPORTANTE: Execute primeiro o arquivo fix_users_table_structure.sql
+-- para corrigir o tipo da coluna id (integer → uuid) antes de usar este trigger!
 -- =====================================================
 
 -- PASSO 1: Criar a Função SQL
