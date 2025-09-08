@@ -38,6 +38,9 @@
     "**/*.test.ts"
   ],
   "ts-node": {
-    "esm": true
+    "esm": false,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   }
 }

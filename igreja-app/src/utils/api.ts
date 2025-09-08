@@ -6,8 +6,44 @@ import {
   profileSupabase, 
   healthSupabase 
 } from './supabaseUtils';
+import { supabase } from '../supabaseClient';
 
-// Todas as chamadas agora usam Supabase - sem necessidade de API_BASE_URL
+// Base URL para chamadas ao backend
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://igreja-backend.onrender.com'
+  : 'http://localhost:3001';
+
+// Função para fazer chamadas HTTP reais ao backend (para endpoints que precisam de autenticação JWT)
+export const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {
+  try {
+    // Obter token do Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.access_token) {
+      throw new Error('Token de autenticação não encontrado');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Erro na API ${endpoint}:`, error);
+    throw error;
+  }
+};
+
+// Todas as chamadas agora usam Supabase - sem necessidade de API_BASE_URL para endpoints Supabase
 
 // Função utilitária para fazer chamadas à API usando Supabase
 export const apiCall = async (endpoint: string, options: RequestInit = {}) => {

@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (data.user) {
         // Buscar dados adicionais do usuário
         try {
-          const userData = await apiCallAuth('/auth/me');
+          const userData = await apiCallAuth('/profile');
           // Garantir que o objeto de usuário tenha todas as propriedades necessárias
           const completeUser = {
             id: userData.id || data.user.id,
@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             supervisor_id: userData.supervisor_id,
             coordinator_id: userData.coordinator_id,
             cell_id: userData.cell_id,
-            celulaNome: userData.celulaNome,
+            celulaNome: userData.cell_name,
             oikos_name: userData.oikos_name
           };
           setUser(completeUser);
