@@ -4,18 +4,17 @@ import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
 
-// Obter perfil do usuário logado
+// Obter perfil do usuário logado - ULTRA RÁPIDO (apenas dados essenciais)
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
     const db = await initDatabase();
+    
+    // QUERY SIMPLIFICADA: apenas UMA consulta com dados essenciais indexados
+    // Remove JOINs desnecessários que causam lentidão
     const user = await db.get(`
-      SELECT u.id, u.name, u.email, u.phone, u.role, u.status, u.cell_id,
-             c.cell_number, c.name as cell_name,
-             l.name as leader_name
-      FROM users u
-      LEFT JOIN cells c ON u.cell_id = c.id
-      LEFT JOIN users l ON c.leader_id = l.id
-      WHERE u.id = ?
+      SELECT id, name, email, role, status, cell_id
+      FROM users 
+      WHERE id = ?
     `, [req.user.id]);
     
     if (!user) {

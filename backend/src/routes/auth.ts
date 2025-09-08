@@ -86,11 +86,14 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Verificar token
-router.get('/verify', authenticateToken, async (req: any, res) => {
+// Verificar se o usuário está autenticado - ENDPOINT ULTRA RÁPIDO
+router.get('/me', authenticateToken, async (req: any, res) => {
   try {
     const db = await initDatabase();
-    const user = await db.get('SELECT id, name, email, role, status, cell_id FROM users WHERE id = ?', [req.user.id]);
+    
+    // QUERY ULTRA SIMPLIFICADA: apenas dados essenciais com coluna indexada (id)
+    // Esta é a única consulta permitida neste endpoint crítico
+    const user = await db.get('SELECT id, name, email, role, cell_id FROM users WHERE id = ?', [req.user.id]);
     
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -100,6 +103,36 @@ router.get('/verify', authenticateToken, async (req: any, res) => {
   } catch (error) {
     console.error('Erro na verificação:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Endpoint ULTRA RÁPIDO para verificação de sessão pós-login
+// REGRA: Apenas UMA consulta simples com dados essenciais
+router.get('/session-check', authenticateToken, async (req: any, res) => {
+  try {
+    const db = await initDatabase();
+    
+    // ÚNICA CONSULTA PERMITIDA: buscar dados essenciais usando ID indexado
+    const user = await db.get(
+      'SELECT id, name, email, role, cell_id FROM users WHERE id = ?', 
+      [req.user.id]
+    );
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Retornar apenas dados essenciais - sem JOINs, sem cálculos complexos
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      cell_id: user.cell_id
+    });
+  } catch (error) {
+    console.error('Erro na verificação de sessão:', error);
+    res.status(500).json({ error: 'Erro na verificação de sessão' });
   }
 });
 
