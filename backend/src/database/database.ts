@@ -1,191 +1,40 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import path from 'path';
-import bcrypt from 'bcryptjs';
+// backend/src/database.ts
 
-export async function initDatabase() {
-  const db = await open({
-    filename: path.join(__dirname, '../../database.sqlite'),
-    driver: sqlite3.Database
-  });
+import { Pool } from 'pg';
+import dotenv from 'dotenv';
 
-  // Criar tabela Users
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
-      phone TEXT,
-      role TEXT NOT NULL CHECK (role IN ('Admin', 'Pastor', 'Coordenador', 'Supervisor', 'Líder', 'Membro')),
-      status TEXT NOT NULL DEFAULT 'Ativo' CHECK (status IN ('Ativo', 'Inativo')),
-      cell_id INTEGER,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (cell_id) REFERENCES cells(id)
-    )
-  `);
-  
-  // Adicionar coluna cell_id se não existir (para bancos existentes)
-  try {
-    await db.exec('ALTER TABLE users ADD COLUMN cell_id INTEGER REFERENCES cells(id)');
-  } catch (error) {
-    // Coluna já existe, ignorar erro
-  }
+dotenv.config();
 
-  // Criar tabela Cells
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS cells (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cell_number TEXT NOT NULL UNIQUE,
-      name TEXT,
-      description TEXT,
-      leader_id INTEGER,
-      supervisor_id INTEGER,
-      coordinator_id INTEGER,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (leader_id) REFERENCES users(id),
-      FOREIGN KEY (supervisor_id) REFERENCES users(id),
-      FOREIGN KEY (coordinator_id) REFERENCES users(id)
-    )
-  `);
-  
-  // Adicionar coluna cell_number se não existir (para bancos existentes)
-  try {
-    await db.exec('ALTER TABLE cells ADD COLUMN cell_number TEXT UNIQUE');
-  } catch (error) {
-    // Coluna já existe, ignorar erro
-  }
+// Variável para guardar a conexão (singleton)
+let dbInstance: Pool | null = null;
 
-  // Criar tabela de relacionamento user_cells
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS user_cells (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      cell_id INTEGER NOT NULL,
-      role TEXT NOT NULL CHECK (role IN ('Líder', 'Membro')),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id),
-      FOREIGN KEY (cell_id) REFERENCES cells(id),
-      UNIQUE(user_id, cell_id)
-    )
-  `);
-
-  // Criar tabela prayer_logs (Registos de Oração)
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS prayer_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      prayer_date DATE NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id),
-      UNIQUE(user_id, prayer_date)
-    )
-  `);
-
-  // Criar tabela user_profiles (Perfis dos Usuários)
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS user_profiles (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER UNIQUE NOT NULL,
-      whatsapp TEXT,
-      gender TEXT CHECK (gender IS NULL OR gender = '' OR gender IN ('M', 'F')),
-      date_of_birth DATE,
-      birth_city TEXT,
-      birth_state TEXT,
-      address TEXT,
-      address_number TEXT,
-      neighborhood TEXT,
-      cep TEXT,
-      reference_point TEXT,
-      father_name TEXT,
-      mother_name TEXT,
-      marital_status TEXT CHECK (marital_status IS NULL OR marital_status = '' OR marital_status IN ('Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'União Estável', 'Outros')),
-      spouse_name TEXT,
-      education TEXT,
-      profession TEXT,
-      conversion_date DATE,
-      previous_church TEXT,
-      oikos_name TEXT,
-      oikos_name_2 TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `);
-
-  // Criar tabela dependents (Dependentes/Filhos)
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS dependents (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      full_name TEXT NOT NULL,
-      date_of_birth DATE NOT NULL,
-      gender TEXT NOT NULL CHECK (gender IN ('M', 'F')),
-      observations TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    )
-  `);
-
-  // Inserir usuário pastor padrão se não existir
-  const existingPastor = await db.get('SELECT id FROM users WHERE role = "Pastor" LIMIT 1');
-  if (!existingPastor) {
-    const hashedPassword = await bcrypt.hash('pastor123', 10);
-    await db.run(`
-      INSERT INTO users (name, email, password, phone, role, status)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, ['Pastor Principal', 'pastor@igreja.com', hashedPassword, '(11) 99999-9999', 'Pastor', 'Ativo']);
-  }
-
-  // Inserir usuário administrador padrão se não existir
-  const existingAdmin = await db.get('SELECT id FROM users WHERE role = "Admin" LIMIT 1');
-  if (!existingAdmin) {
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    await db.run(`
-      INSERT INTO users (name, email, password, phone, role, status)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, ['Administrador', 'admin@igreja.com', hashedPassword, '(11) 99999-8888', 'Admin', 'Ativo']);
-  }
-
-  // Inserir célula de teste se não existir
-  const existingCell = await db.get('SELECT id FROM cells WHERE cell_number = "1" LIMIT 1');
-  if (!existingCell) {
-    const cellResult = await db.run(`
-      INSERT INTO cells (cell_number, name, description)
-      VALUES (?, ?, ?)
-    `, ['1', 'Célula 1', 'Célula de teste para desenvolvimento']);
-    
-    // Inserir usuário membro de teste associado à célula
-    const existingMember = await db.get('SELECT id FROM users WHERE email = "membro@teste.com" LIMIT 1');
-    if (!existingMember) {
-      const hashedPassword = await bcrypt.hash('membro123', 10);
-      await db.run(`
-        INSERT INTO users (name, email, password, phone, role, status, cell_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, ['Membro Teste', 'membro@teste.com', hashedPassword, '(11) 99999-7777', 'Membro', 'Ativo', cellResult.lastID]);
+// A NOVA FUNÇÃO DE CONEXÃO (só roda uma vez)
+export const connectDatabase = async () => {
+    if (dbInstance) {
+        return; // Se já conectado, não faz nada
     }
-  }
 
-  // Criar wrapper para compatibilidade com DatabaseAdapter
-  return {
-    get: async (sql: string, params: any[] = []) => {
-      return await db.get(sql, params);
-    },
-    all: async (sql: string, params: any[] = []) => {
-      return await db.all(sql, params);
-    },
-    run: async (sql: string, params: any[] = []) => {
-      const result = await db.run(sql, params);
-      return {
-        lastID: result.lastID,
-        changes: result.changes || 0
-      };
-    },
-    exec: async (sql: string) => {
-      await db.exec(sql);
+    try {
+        console.log('🐘 Conectando à base de dados PostgreSQL (Neon)...');
+        dbInstance = new Pool({
+            connectionString: process.env.DATABASE_URL,
+        });
+        
+        // Testa a conexão para garantir que está tudo certo
+        await dbInstance.query('SELECT NOW()');
+
+        console.log('✅ Conexão com a base de dados estabelecida com sucesso!');
+    } catch (error) {
+        console.error('❌ Erro fatal ao conectar com a base de dados:', error);
+        // Em caso de erro na conexão, o processo do servidor deve parar.
+        process.exit(1); 
     }
-  };
-}
+};
+
+// A NOVA FUNÇÃO PARA OBTER A CONEXÃO (usada em todas as rotas)
+export const getDatabase = () => {
+    if (!dbInstance) {
+        throw new Error('A base de dados não foi inicializada. A conexão falhou no início.');
+    }
+    return dbInstance;
+};

@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -13,7 +13,7 @@ router.post('/login', async (req, res) => {
     console.log('🔍 LOGIN DEBUG - Email:', email);
     console.log('🔍 LOGIN DEBUG - Password length:', password?.length);
     
-    const db = await initDatabase();
+    const db = getDatabase(); // <--- LINHA CORRIGIDA
     
     const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
     console.log('🔍 LOGIN DEBUG - User found:', !!user);
@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone, cell_id } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se email já existe
     const existingUser = await db.get('SELECT id FROM users WHERE email = ?', [email]);
@@ -89,7 +89,7 @@ router.post('/register', async (req, res) => {
 // Verificar se o usuário está autenticado - ENDPOINT ULTRA RÁPIDO
 router.get('/me', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // QUERY ULTRA SIMPLIFICADA: apenas dados essenciais com coluna indexada (id)
     // Esta é a única consulta permitida neste endpoint crítico
@@ -110,7 +110,7 @@ router.get('/me', authenticateToken, async (req: any, res) => {
 // REGRA: Apenas UMA consulta simples com dados essenciais
 router.get('/session-check', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // ÚNICA CONSULTA PERMITIDA: buscar dados essenciais usando ID indexado
     const user = await db.get(

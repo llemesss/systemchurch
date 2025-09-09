@@ -1,5 +1,5 @@
 import express from 'express';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -7,7 +7,7 @@ const router = express.Router();
 // Listar células públicas (para registro)
 router.get('/public', async (req, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     const cells = await db.all(`
       SELECT id, cell_number, name
       FROM cells
@@ -24,7 +24,7 @@ router.get('/public', async (req, res) => {
 // Listar todas as células
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     const cells = await db.all(`
       SELECT c.*, 
              l1.name as leader_1_name,
@@ -63,7 +63,7 @@ router.get('/', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { cell_number, leader_id } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Validar se cell_number foi fornecido
     if (!cell_number) {
@@ -121,7 +121,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { cell_number, leader_id } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Validar se cell_number foi fornecido
     if (!cell_number) {
@@ -178,7 +178,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 router.get('/:id/members', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Buscar informações da célula
     const cell = await db.get(`
@@ -225,7 +225,7 @@ router.get('/:id/members', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     await db.run('DELETE FROM cells WHERE id = ?', [id]);
     

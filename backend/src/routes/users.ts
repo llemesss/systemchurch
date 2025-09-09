@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -8,7 +8,7 @@ const router = express.Router();
 // Listar todos os usuários
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     const users = await db.all(`
       SELECT u.id, u.name, u.email, u.phone, u.role, u.status, u.created_at,
              u.cell_id
@@ -26,7 +26,7 @@ router.get('/', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { name, email, password, phone, role } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se email já existe
     const existingUser = await db.get('SELECT id FROM users WHERE email = ?', [email]);
@@ -67,7 +67,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     console.log('📥 BACKEND - Body recebido:', req.body);
     console.log('📥 BACKEND - cell_id recebido:', cell_id);
     
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Atualizar dados básicos do usuário (incluindo cell_id)
     console.log('🔧 BACKEND - Executando UPDATE na tabela users com cell_id:', cell_id);
@@ -131,7 +131,7 @@ router.put('/:id/password', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { password } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
@@ -151,7 +151,7 @@ router.put('/:id/password', authenticateToken, async (req, res) => {
 router.get('/:id/prayer-stats', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se o usuário existe
     const user = await db.get('SELECT id, name FROM users WHERE id = ?', [id]);

@@ -15,38 +15,28 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
   }
 
   try {
-    // Primeiro, tentar verificar como token JWT do backend
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'igreja-secret-key') as any;
-      req.user = decoded;
-      return next();
-    } catch (backendTokenError) {
-      // Se falhar, tentar como token do Supabase
-      console.log('Token não é do backend, tentando Supabase...');
-    }
-
-    // Verificar token do Supabase
-    const supabaseJwtSecret = process.env.SUPABASE_JWT_SECRET;
-    if (!supabaseJwtSecret) {
+    // Verificar token JWT do backend
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
       return res.status(500).json({ error: 'Configuração de autenticação não encontrada' });
     }
 
-    const decoded = jwt.verify(token, supabaseJwtSecret) as any;
+    const decoded = jwt.verify(token, jwtSecret) as any;
     
-    // Para tokens do Supabase, precisamos buscar o usuário na nossa base de dados
+    // Buscar o usuário na base de dados para garantir que ainda existe
     const db = await initDatabase();
-    const user = await db.get('SELECT * FROM users WHERE auth_id = ?', [decoded.sub]);
+    const user = await db.get('SELECT * FROM users WHERE id = ?', [decoded.id]);
     
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado na base de dados' });
     }
 
-    // Criar objeto de usuário compatível
+    // Criar objeto de usuário
     req.user = {
       id: user.id,
-      auth_id: user.auth_id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      name: user.name
     };
     
     next();

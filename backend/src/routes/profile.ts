@@ -1,5 +1,5 @@
 import express from 'express';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -7,7 +7,7 @@ const router = express.Router();
 // Obter perfil do usuário logado - ULTRA RÁPIDO (apenas dados essenciais)
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // QUERY SIMPLIFICADA: apenas UMA consulta com dados essenciais indexados
     // Remove JOINs desnecessários que causam lentidão
@@ -56,7 +56,7 @@ router.put('/', authenticateToken, async (req: any, res) => {
       oikos_name_2
     } = req.body;
     
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se o usuário existe
     const existingUser = await db.get('SELECT id FROM users WHERE id = ?', [req.user.id]);
@@ -150,7 +150,7 @@ router.put('/', authenticateToken, async (req: any, res) => {
 // Obter perfil completo do usuário logado - OTIMIZADO
 router.get('/complete', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Query otimizada: uma única consulta com JOINs e índices
     // Agora usa os índices criados para melhor performance

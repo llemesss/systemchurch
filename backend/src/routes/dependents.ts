@@ -1,5 +1,5 @@
 import express from 'express';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -7,7 +7,7 @@ const router = express.Router();
 // Listar dependentes do usuário logado
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     const dependents = await db.all(`
       SELECT id, full_name, date_of_birth, gender, observations, created_at
       FROM dependents
@@ -26,7 +26,7 @@ router.get('/', authenticateToken, async (req: any, res) => {
 router.post('/', authenticateToken, async (req: any, res) => {
   try {
     const { full_name, date_of_birth, gender, observations } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Validar campos obrigatórios
     if (!full_name || !date_of_birth || !gender) {
@@ -61,7 +61,7 @@ router.put('/:id', authenticateToken, async (req: any, res) => {
   try {
     const { id } = req.params;
     const { full_name, date_of_birth, gender, observations } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se o dependente pertence ao usuário logado
     const existingDependent = await db.get(
@@ -105,7 +105,7 @@ router.put('/:id', authenticateToken, async (req: any, res) => {
 router.delete('/:id', authenticateToken, async (req: any, res) => {
   try {
     const { id } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se o dependente pertence ao usuário logado
     const existingDependent = await db.get(

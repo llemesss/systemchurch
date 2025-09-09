@@ -1,5 +1,5 @@
 import express from 'express';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/user/:userId', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     const userCells = await db.all(`
       SELECT c.*, uc.role as user_role
@@ -28,7 +28,7 @@ router.get('/user/:userId', authenticateToken, async (req, res) => {
 router.get('/cell/:cellId', authenticateToken, async (req, res) => {
   try {
     const { cellId } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     const cellMembers = await db.all(`
       SELECT u.*, uc.role as cell_role
@@ -48,7 +48,7 @@ router.get('/cell/:cellId', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { user_id, cell_id, role } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se a associação já existe
     const existingAssociation = await db.get(
@@ -81,7 +81,7 @@ router.post('/', authenticateToken, async (req, res) => {
 router.delete('/', authenticateToken, async (req, res) => {
   try {
     const { user_id, cell_id } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     await db.run(
       'DELETE FROM user_cells WHERE user_id = ? AND cell_id = ?',

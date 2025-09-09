@@ -1,5 +1,5 @@
 import express from 'express';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -7,7 +7,7 @@ const router = express.Router();
 // Registrar oração do dia
 router.post('/log', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     
     console.log('🙏 PRAYER LOG - User ID:', req.user.id);
@@ -48,7 +48,7 @@ router.post('/log', authenticateToken, async (req: any, res) => {
 // Verificar se o usuário já orou hoje
 router.get('/status/today', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     
     console.log('🔍 PRAYER STATUS - Checking for user:', req.user.id, 'date:', today);
@@ -75,7 +75,7 @@ router.get('/status/today', authenticateToken, async (req: any, res) => {
 // Obter estatísticas de oração do usuário
 router.get('/stats', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     

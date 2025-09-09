@@ -1,12 +1,13 @@
-import { 
-  authSupabase, 
-  usersSupabase, 
-  cellsSupabase, 
-  prayersSupabase, 
-  profileSupabase, 
-  healthSupabase 
-} from './supabaseUtils';
-import { supabase } from '../supabaseClient';
+import {
+  authBackend,
+  usersBackend,
+  cellsBackend,
+  prayersBackend,
+  profileBackend,
+  healthBackend,
+  userCellsBackend,
+  apiCall as backendApiCall
+} from './backendApi';
 
 // Base URL para chamadas ao backend
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
@@ -43,9 +44,7 @@ export const apiCallAuth = async (endpoint: string, options: RequestInit = {}) =
   }
 };
 
-// Todas as chamadas agora usam Supabase - sem necessidade de API_BASE_URL para endpoints Supabase
-
-// Função utilitária para fazer chamadas à API usando Supabase
+// Função utilitária para fazer chamadas à API usando o backend
 export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
   const method = options.method || 'GET';
   const body = options.body ? JSON.parse(options.body as string) : null;
@@ -55,81 +54,112 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
     switch (true) {
       // Autenticação
       case endpoint === '/auth/login':
-        return await authSupabase.login(body.email, body.password);
+        return await authBackend.login(body.email, body.password);
       
       case endpoint === '/auth/register':
-        return await authSupabase.register(body);
+        return await authBackend.register(body);
       
       case endpoint.startsWith('/auth/me'):
-        const currentUserId = await getCurrentUserId();
-        return await authSupabase.getCurrentUser(currentUserId);
+        return await authBackend.getCurrentUser();
       
       // Usuários
       case endpoint === '/users' && method === 'GET':
-        return await usersSupabase.getAll();
+        return await usersBackend.getAll();
       
       case endpoint === '/users' && method === 'POST':
-        return await usersSupabase.create(body);
+        return await usersBackend.create(body);
       
       case !!endpoint.match(/^\/users\/\d+$/) && method === 'PUT':
         const updateUserId = parseInt(endpoint.split('/')[2]);
-        return await usersSupabase.update(updateUserId, body);
+        return await usersBackend.update(updateUserId, body);
       
       case !!endpoint.match(/^\/users\/\d+$/) && method === 'DELETE':
         const deleteUserId = parseInt(endpoint.split('/')[2]);
-        return await usersSupabase.delete(deleteUserId);
+        return await usersBackend.delete(deleteUserId);
+      
+      case !!endpoint.match(/^\/users\/\d+$/) && method === 'GET':
+        const getUserId = parseInt(endpoint.split('/')[2]);
+        return await usersBackend.getById(getUserId);
       
       case !!endpoint.match(/^\/users\/\d+\/prayer-stats$/):
         const statsUserId = parseInt(endpoint.split('/')[2]);
-        return await usersSupabase.getPrayerStats(statsUserId);
+        return await usersBackend.getPrayerStats(statsUserId);
+      
+      case !!endpoint.match(/^\/users\/\d+\/password$/) && method === 'PUT':
+        const passwordUserId = parseInt(endpoint.split('/')[2]);
+        return await usersBackend.updatePassword(passwordUserId, body.password);
       
       // Células
       case endpoint === '/cells' && method === 'GET':
-        return await cellsSupabase.getAll();
+        return await cellsBackend.getAll();
       
       case endpoint === '/cells/public':
-        return await cellsSupabase.getPublic();
+        return await cellsBackend.getPublic();
       
       case endpoint === '/cells' && method === 'POST':
-        return await cellsSupabase.create(body);
+        return await cellsBackend.create(body);
       
       case !!endpoint.match(/^\/cells\/\d+$/) && method === 'PUT':
         const updateCellId = parseInt(endpoint.split('/')[2]);
-        return await cellsSupabase.update(updateCellId, body);
+        return await cellsBackend.update(updateCellId, body);
       
       case !!endpoint.match(/^\/cells\/\d+$/) && method === 'DELETE':
         const deleteCellId = parseInt(endpoint.split('/')[2]);
-        return await cellsSupabase.delete(deleteCellId);
+        return await cellsBackend.delete(deleteCellId);
+      
+      case !!endpoint.match(/^\/cells\/\d+$/) && method === 'GET':
+        const getCellId = parseInt(endpoint.split('/')[2]);
+        return await cellsBackend.getById(getCellId);
       
       case !!endpoint.match(/^\/cells\/\d+\/members$/):
         const cellId = parseInt(endpoint.split('/')[2]);
-        return await cellsSupabase.getMembers(cellId);
+        return await cellsBackend.getMembers(cellId);
       
       // Orações
       case endpoint === '/prayers/log' && method === 'POST':
-        const prayerUserId = await getCurrentUserId();
-        return await prayersSupabase.logPrayer(parseInt(prayerUserId), body?.prayer_date);
+        return await prayersBackend.logPrayer(body?.user_id, body?.prayer_date);
       
-      case endpoint === '/prayers/status/today':
-        const statusUserId = await getCurrentUserId();
-        return await prayersSupabase.getTodayStatus(parseInt(statusUserId));
+      case !!endpoint.match(/^\/prayers\/today\/\d+$/):
+        const statusUserId = parseInt(endpoint.split('/')[3]);
+        return await prayersBackend.getTodayStatus(statusUserId);
+      
+      case !!endpoint.match(/^\/prayers\/history\/\d+$/):
+        const historyUserId = parseInt(endpoint.split('/')[3]);
+        return await prayersBackend.getPrayerHistory(historyUserId);
       
       // Perfil
-      case endpoint === '/profile' && method === 'GET':
-        const profileUserId = await getCurrentUserId();
-        return await profileSupabase.get(parseInt(profileUserId));
+      case !!endpoint.match(/^\/profile\/\d+$/) && method === 'GET':
+        const profileUserId = parseInt(endpoint.split('/')[2]);
+        return await profileBackend.get(profileUserId);
       
-      case endpoint === '/profile' && method === 'PUT':
-        const updateProfileUserId = await getCurrentUserId();
-        return await profileSupabase.update(parseInt(updateProfileUserId), body);
+      case !!endpoint.match(/^\/profile\/\d+$/) && method === 'PUT':
+        const updateProfileUserId = parseInt(endpoint.split('/')[2]);
+        return await profileBackend.update(updateProfileUserId, body);
       
-      case endpoint === '/profile/complete' && method === 'POST':
-        const completeUserId = await getCurrentUserId();
-        return await profileSupabase.complete(parseInt(completeUserId), body);
+      case !!endpoint.match(/^\/profile\/\d+\/complete$/) && method === 'POST':
+        const completeUserId = parseInt(endpoint.split('/')[2]);
+        return await profileBackend.complete(completeUserId, body);
+      
+      // User Cells
+      case endpoint === '/user-cells' && method === 'GET':
+        return await userCellsBackend.getAll();
+      
+      case endpoint === '/user-cells' && method === 'POST':
+        return await userCellsBackend.create(body.user_id, body.cell_id, body.role);
+      
+      case endpoint === '/user-cells' && method === 'DELETE':
+        return await userCellsBackend.delete(body.user_id, body.cell_id);
+      
+      case !!endpoint.match(/^\/user-cells\/user\/\d+$/):
+        const userCellUserId = parseInt(endpoint.split('/')[3]);
+        return await userCellsBackend.getByUser(userCellUserId);
+      
+      case endpoint === '/user-cells/role' && method === 'PUT':
+        return await userCellsBackend.updateRole(body.user_id, body.cell_id, body.role);
       
       // Health Check
       case endpoint === '/health':
-        return await healthSupabase.check();
+        return await healthBackend.check();
       
       default:
         throw new Error(`Endpoint não implementado: ${method} ${endpoint}`);
@@ -140,16 +170,9 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
   }
 };
 
-// Função auxiliar para obter ID do usuário atual
-async function getCurrentUserId(): Promise<string> {
-  const { supabase } = await import('../supabaseClient');
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    throw new Error('Usuário não autenticado');
-  }
-  
-  return user.id;
+// Função auxiliar para obter token de autenticação
+function getAuthToken(): string | null {
+  return localStorage.getItem('authToken');
 }
 
 // Upload de arquivos agora deve ser implementado via Supabase Storage

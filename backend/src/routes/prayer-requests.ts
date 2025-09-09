@@ -1,5 +1,5 @@
 import express from 'express';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.post('/', authenticateToken, async (req: any, res) => {
       urgency = 'normal'
     } = req.body;
     
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Criar tabela se não existir
     await db.exec(`
@@ -67,7 +67,7 @@ router.get('/public', async (req, res) => {
     const { category, page = 1, limit = 10 } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
     
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     let whereClause = 'WHERE pr.is_public = 1 AND pr.status = "ativo"';
     const params: any[] = [];
@@ -105,7 +105,7 @@ router.get('/public', async (req, res) => {
 // Listar pedidos do usuário logado
 router.get('/my-requests', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     const requests = await db.all(
       `SELECT pr.*, COUNT(prl.id) as prayer_count
@@ -128,7 +128,7 @@ router.get('/my-requests', authenticateToken, async (req: any, res) => {
 router.post('/:id/pray', authenticateToken, async (req: any, res) => {
   try {
     const { id } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Criar tabela de logs de oração se não existir
     await db.exec(`
@@ -183,7 +183,7 @@ router.put('/:id', authenticateToken, async (req: any, res) => {
     const { id } = req.params;
     const { title, description, category, is_public, urgency, status } = req.body;
     
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se o pedido pertence ao usuário
     const request = await db.get(
@@ -225,7 +225,7 @@ router.put('/:id', authenticateToken, async (req: any, res) => {
 router.delete('/:id', authenticateToken, async (req: any, res) => {
   try {
     const { id } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Verificar se o pedido pertence ao usuário
     const request = await db.get(

@@ -1,5 +1,5 @@
 import express from 'express';
-import { initDatabase } from '../database';
+import { getDatabase } from '../database/database';
 import { authenticateToken } from '../middleware/auth';
 
 const router = express.Router();
@@ -7,7 +7,7 @@ const router = express.Router();
 // Obter perfil do usuário logado - OTIMIZADO
 router.get('/', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Query otimizada com índices nas colunas de busca
     const user = await db.get(`
@@ -34,7 +34,7 @@ router.get('/', authenticateToken, async (req: any, res) => {
 // Obter perfil completo do usuário logado - OTIMIZADO
 router.get('/complete', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Query otimizada: uma única consulta com JOINs em vez de múltiplas queries
     // Isso reduz significativamente o tempo de resposta
@@ -94,7 +94,7 @@ router.put('/', authenticateToken, async (req: any, res) => {
       oikos_name_2
     } = req.body;
 
-    const db = await initDatabase();
+    const db = getDatabase(); // <-- USA A CONEXÃO JÁ EXISTENTE! NÃO CRIA UMA NOVA.
     
     // Usar transação para garantir consistência
     await db.exec('BEGIN TRANSACTION');
