@@ -1,1 +1,5 @@
-/* /index.html 200
+# Redirecionamentos para Netlify Functions
+/api/*  /.netlify/functions/api/:splat  200
+
+# Redirecionamento para SPA (Single Page Application)
+/*    /index.html   200
