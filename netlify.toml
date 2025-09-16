@@ -5,8 +5,8 @@
   # Comando de build
   command = "npm run build"
   
-  # Diretório de saída
-  publish = "igreja-app/dist"
+  # Diretório de saída (relativo ao base)
+  publish = "dist"
   
   # Functions directory
   functions = "netlify/functions"
