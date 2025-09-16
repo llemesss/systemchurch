@@ -80,9 +80,9 @@ const PedidosOracao: React.FC = () => {
         return;
       }
       
-      // Usar Supabase através do utilitário de API
+      // Usar backend próprio através do utilitário de API
       const { apiCall } = await import('../utils/api');
-      const userId = parseInt(token.replace('supabase_token_', ''));
+      // Token já contém as informações necessárias, não precisa extrair userId manualmente
       
       let response;
       if (editingRequest) {
@@ -90,7 +90,7 @@ const PedidosOracao: React.FC = () => {
           method: 'PUT',
           body: JSON.stringify({
             ...formData,
-            user_id: userId
+            user_id: user?.id
           })
         });
       } else {
@@ -98,7 +98,7 @@ const PedidosOracao: React.FC = () => {
           method: 'POST',
           body: JSON.stringify({
             ...formData,
-            user_id: userId
+            user_id: user?.id
           })
         });
       }

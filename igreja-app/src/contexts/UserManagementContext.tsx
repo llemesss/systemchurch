@@ -14,9 +14,9 @@ const UserManagementContext = createContext<UserManagementContextType | undefine
 
 // API Helper functions
 const apiCallUserMgmt = async (endpoint: string, options: RequestInit = {}) => {
-  // Usar Supabase através do utilitário de API
-  const { apiCall: supabaseApiCall } = await import('../utils/api');
-  return await supabaseApiCall(endpoint, options);
+  // Usar backend próprio através do utilitário de API
+  const { apiCall: backendApiCall } = await import('../utils/api');
+  return await backendApiCall(endpoint, options);
 };
 
 export const UserManagementProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

@@ -83,7 +83,7 @@ const CellDetails: React.FC = () => {
   const loadCellDetails = useCallback(async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+      const token = localStorage.getItem('igreja_token');
       
       if (!token) {
         toast.error('Token de autenticação não encontrado');
@@ -91,9 +91,11 @@ const CellDetails: React.FC = () => {
         return;
       }
 
-      // Usar Supabase através do utilitário de API
-      const { cellsSupabase } = await import('../utils/supabaseUtils');
-      const data = await cellsSupabase.getMembers(parseInt(cellId!));
+      // Usar backend próprio através do utilitário de API
+      const { apiCallAuth } = await import('../utils/api');
+      const data = await apiCallAuth(`/cells/${cellId}/members`, {
+        method: 'GET'
+      });
       setCellData(data);
     } catch (error) {
       console.error('Erro ao carregar detalhes da célula:', error);

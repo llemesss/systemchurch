@@ -22,7 +22,7 @@ const AtendimentoPastoral: React.FC = () => {
     e.preventDefault();
     
     try {
-      // Usar Supabase através do utilitário de API
+      // Usar backend próprio através do utilitário de API
       const { apiCall } = await import('../utils/api');
       
       const response = await apiCall('/pastoral-care', {
@@ -38,7 +38,7 @@ const AtendimentoPastoral: React.FC = () => {
         })
       });
       
-      // Dados já obtidos do Supabase
+      // Dados já obtidos do backend próprio
       if (response) {
         alert('Sua solicitação foi enviada! Entraremos em contato em breve.');
         setFormData({

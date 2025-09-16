@@ -42,40 +42,43 @@ const OracaoDiaria: React.FC = () => {
   // Escutar comandos de redirecionamento via WebSocket
   useRedirectListener();
   
-  // Função para buscar membros da célula via Supabase
+  // Função para buscar membros da célula via backend próprio
   const buscarMembrosDaCelula = async (cellId: string) => {
-    // Usar Supabase através do utilitário de API
-    const { cellsSupabase } = await import('../utils/supabaseUtils');
-    const data = await cellsSupabase.getMembers(parseInt(cellId));
+    const { apiCall } = await import('../utils/api');
+    const data = await apiCall(`/cells/${cellId}/members`, {
+      method: 'GET'
+    });
     
     return data;
   };
   
-  // Função para verificar status da oração via Supabase
+  // Função para verificar status da oração via backend próprio
    const buscarStatusOracaoHoje = async () => {
-     // Usar Supabase através do utilitário de API
-     const { prayersSupabase } = await import('../utils/supabaseUtils');
-     const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+     const { apiCallAuth } = await import('../utils/api');
+     const token = localStorage.getItem('igreja_token');
      if (!token) throw new Error('Token não encontrado');
      
-     const userId = parseInt(token.replace('supabase_token_', ''));
-     const data = await prayersSupabase.getTodayStatus(userId);
+     // Decodificar o token para obter o userId (ou usar endpoint que retorna dados do usuário atual)
+     const data = await apiCallAuth('/prayers/status/today', {
+       method: 'GET'
+     });
      
      return data;
    };
   
-  // Função para registrar a oração via Supabase
+  // Função para registrar a oração via backend próprio
   const handlePrayerLog = async () => {
     try {
       setIsLoadingPrayer(true);
       
-      // Usar Supabase através do utilitário de API
-       const { prayersSupabase } = await import('../utils/supabaseUtils');
-       const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+      // Usar backend próprio através do utilitário de API
+       const { apiCallAuth } = await import('../utils/api');
+       const token = localStorage.getItem('igreja_token');
        if (!token) throw new Error('Token não encontrado');
        
-       const userId = parseInt(token.replace('supabase_token_', ''));
-       const data = await prayersSupabase.logPrayer(userId);
+       const data = await apiCallAuth('/prayers/log', {
+         method: 'POST'
+       });
       
       setHasPrayed(true);
       console.log('✅ PRAYER LOG - Oração registrada:', data);

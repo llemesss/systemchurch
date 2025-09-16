@@ -56,18 +56,20 @@ const PrayerStatsModal: React.FC<PrayerStatsModalProps> = ({ member, isOpen, onC
   const loadPrayerStats = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+      const token = localStorage.getItem('igreja_token');
       
       if (!token) {
         toast.error('Token de autenticação não encontrado');
         return;
       }
 
-      // Usar Supabase através do utilitário de API
-    const { usersSupabase } = await import('../utils/supabaseUtils');
-    const data = await usersSupabase.getPrayerStats(parseInt(member.id));
+      // Usar backend próprio através do utilitário de API
+      const { apiCallAuth } = await import('../utils/api');
+      const data = await apiCallAuth(`/users/${member.id}/prayer-stats`, {
+        method: 'GET'
+      });
 
-      // Dados já obtidos do Supabase
+      // Dados já obtidos do backend próprio
       setPrayerStats(data as unknown as PrayerStats);
     } catch (error) {
       console.error('Erro ao carregar estatísticas de oração:', error);

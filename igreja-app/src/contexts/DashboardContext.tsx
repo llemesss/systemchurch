@@ -16,7 +16,7 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 // API Helper function
 const apiCallDashboard = async (endpoint: string, options: RequestInit = {}) => {
-  // Usar Supabase através do utilitário de API
+  // Usar backend próprio através do utilitário de API
   return await apiCall(endpoint, options);
 };
 

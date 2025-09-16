@@ -5,8 +5,7 @@ import {
   prayersBackend,
   profileBackend,
   healthBackend,
-  userCellsBackend,
-  apiCall as backendApiCall
+  userCellsBackend
 } from './backendApi';
 
 // Base URL para chamadas ao backend
@@ -17,10 +16,10 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 // Função para fazer chamadas HTTP reais ao backend (para endpoints que precisam de autenticação JWT)
 export const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {
   try {
-    // Obter token do Supabase
-    const { data: { session } } = await supabase.auth.getSession();
+    // Obter token do localStorage
+    const token = localStorage.getItem('igreja_token');
     
-    if (!session?.access_token) {
+    if (!token) {
       throw new Error('Token de autenticação não encontrado');
     }
 
@@ -28,7 +27,7 @@ export const apiCallAuth = async (endpoint: string, options: RequestInit = {}) =
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
+        'Authorization': `Bearer ${token}`,
         ...options.headers,
       },
     });
@@ -170,15 +169,8 @@ export const apiCall = async (endpoint: string, options: RequestInit = {}) => {
   }
 };
 
-// Função auxiliar para obter token de autenticação
-function getAuthToken(): string | null {
-  return localStorage.getItem('authToken');
-}
-
-// Upload de arquivos agora deve ser implementado via Supabase Storage
-// Função removida - usar supabase.storage.from('bucket').upload() diretamente
-
-// URLs removidas - todas as operações agora usam Supabase diretamente
+// Todas as operações de upload e storage agora devem ser implementadas via backend próprio
+// URLs removidas - todas as operações agora usam backend próprio
 
 // Endpoints específicos
 export const ENDPOINTS = {

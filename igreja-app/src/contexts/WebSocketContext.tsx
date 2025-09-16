@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-// WebSocket será implementado com Supabase Realtime
+// WebSocket será implementado com backend próprio
 // import { WS_BASE_URL } from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -35,12 +35,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     if (!user) return;
 
     // Conectar ao WebSocket apenas se o usuário estiver autenticado
-    const token = localStorage.getItem('igreja_token') || sessionStorage.getItem('igreja_token');
+    const token = localStorage.getItem('igreja_token');
     if (!token) return;
 
-    // TODO: Implementar com Supabase Realtime
+    // TODO: Implementar com backend próprio WebSocket
     // const wsUrl = `wss://localhost:3001/ws?token=${encodeURIComponent(token)}`;
-    console.warn('WebSocket temporariamente desabilitado - implementar com Supabase Realtime');
+    console.warn('WebSocket temporariamente desabilitado - implementar com backend próprio');
     return;
     
     // const ws = new WebSocket(wsUrl);
