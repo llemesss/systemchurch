@@ -35,7 +35,7 @@ app.use(express.json());
 connectDatabase(); 
 
 // Rota de health check
-app.get('/api/health', async (req, res) => {
+app.get('/health', async (req, res) => {
   try {
     const db = getDatabase();
     res.json({ 
@@ -54,15 +54,15 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Rotas da API
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/cells', cellRoutes);
-app.use('/api/user-cells', userCellRoutes);
-app.use('/api/dependents', dependentsRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/prayers', prayerRoutes);
-app.use('/api/prayer-requests', prayerRequestRoutes);
+// Rotas da API (sem o prefixo /api pois já está na URL da function)
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/cells', cellRoutes);
+app.use('/user-cells', userCellRoutes);
+app.use('/dependents', dependentsRoutes);
+app.use('/profile', profileRoutes);
+app.use('/prayers', prayerRoutes);
+app.use('/prayer-requests', prayerRequestRoutes);
 
 // Handler para Netlify Functions
 export const handler: Handler = serverless(app);
