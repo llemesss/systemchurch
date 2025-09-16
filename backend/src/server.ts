@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3001;
 // Configurar CORS baseado no ambiente
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:5173', 'http://localhost:5174'];
+  : ['http://localhost:5173', 'http://localhost:5174', 'https://idpb.netlify.app'];
 
 app.use(cors({
   origin: allowedOrigins,
