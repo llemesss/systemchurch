@@ -220,7 +220,7 @@ router.get('/:id/prayer-stats', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const db = await initDatabase();
+    const db = getDatabase();
     
     await db.run('DELETE FROM users WHERE id = ?', [id]);
     

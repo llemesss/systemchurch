@@ -257,7 +257,7 @@ router.delete('/:id', authenticateToken, async (req: any, res) => {
 // Obter estatísticas de pedidos de oração
 router.get('/stats', authenticateToken, async (req: any, res) => {
   try {
-    const db = await initDatabase();
+    const db = getDatabase();
     
     const stats = await db.get(`
       SELECT 

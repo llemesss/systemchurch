@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { initDatabase } from '../database/database';
+import { getDatabase } from '../database/database';
 
 interface AuthRequest extends Request {
   user?: any;
@@ -24,7 +24,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     const decoded = jwt.verify(token, jwtSecret) as any;
     
     // Buscar o usuário na base de dados para garantir que ainda existe
-    const db = await initDatabase();
+    const db = getDatabase();
     const user = await db.get('SELECT * FROM users WHERE id = ?', [decoded.id]);
     
     if (!user) {

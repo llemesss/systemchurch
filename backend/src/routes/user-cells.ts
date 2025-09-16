@@ -99,7 +99,7 @@ router.delete('/', authenticateToken, async (req, res) => {
 router.put('/', authenticateToken, async (req, res) => {
   try {
     const { user_id, cell_id, role } = req.body;
-    const db = await initDatabase();
+    const db = getDatabase();
     
     await db.run(
       'UPDATE user_cells SET role = ? WHERE user_id = ? AND cell_id = ?',

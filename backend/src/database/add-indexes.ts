@@ -1,4 +1,4 @@
-import { initDatabase } from './index';
+import { getDatabase } from './database';
 
 /**
  * Script para adicionar índices críticos para melhorar a performance das consultas
@@ -6,7 +6,7 @@ import { initDatabase } from './index';
  */
 export async function addPerformanceIndexes() {
   try {
-    const db = await initDatabase();
+    const db = getDatabase();
     
     console.log('🔧 Adicionando índices para otimização de performance...');
     
@@ -149,7 +149,7 @@ export async function analyzeQueryPerformance() {
   }
   
   try {
-    const db = await initDatabase();
+    const db = getDatabase();
     
     console.log('\n🔍 Analisando performance das consultas principais...');
     

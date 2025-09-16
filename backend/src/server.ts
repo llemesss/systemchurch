@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { initDatabase, checkDatabaseHealth, isUsingPostgreSQL } from './database';
+import { connectDatabase, getDatabase } from './database/database';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
 import cellRoutes from './routes/cells';
@@ -41,20 +41,22 @@ app.use('/api/prayer-requests', prayerRequestRoutes);
 // Rota de health check
 app.get('/api/health', async (req, res) => {
   try {
-    const dbHealth = await checkDatabaseHealth();
+    const db = getDatabase();
+    await db.query('SELECT NOW()');
     res.json({ 
       status: 'OK', 
       message: 'Servidor funcionando',
-      database: dbHealth,
+      database: 'Connected',
       environment: process.env.NODE_ENV || 'development',
-      databaseType: isUsingPostgreSQL() ? 'PostgreSQL' : 'SQLite',
+      databaseType: 'PostgreSQL',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
+    console.error('Erro no health check:', error);
     res.status(500).json({ 
       status: 'ERROR', 
       message: 'Erro no servidor',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
     });
   }
 });
@@ -62,7 +64,7 @@ app.get('/api/health', async (req, res) => {
 // Inicializar banco de dados e servidor
 async function startServer() {
   try {
-    await initDatabase();
+    await connectDatabase();
     console.log('✅ Banco de dados inicializado');
     
     app.listen(PORT, () => {
