@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { Config } from "@netlify/functions";
 
 export default async (req, context) => {
@@ -8,7 +7,7 @@ export default async (req, context) => {
       status: 200,
       headers: {
         'Access-Control-Allow-Origin': req.headers.get('origin') || 'https://idpb.netlify.app',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Credentials': 'true'
       }
@@ -27,8 +26,8 @@ export default async (req, context) => {
   }
 
   try {
-    const body = await req.text();
-    const { email, password } = JSON.parse(body);
+    const body = await req.json();
+    const { email, password } = body;
 
     // Validação básica
     if (!email || !password) {
@@ -42,14 +41,26 @@ export default async (req, context) => {
       });
     }
 
-    // Credenciais de teste (em produção, usar banco de dados)
-    const validCredentials = {
-      'admin@idpb.com': 'admin123',
-      'pastor@idpb.com': 'pastor123',
-      'secretario@idpb.com': 'secretario123'
-    };
-
-    if (validCredentials[email] !== password) {
+    // Simulação de autenticação (substituir por lógica real)
+    if (email === 'admin@idpb.com' && password === 'admin123') {
+      return new Response(JSON.stringify({
+        success: true,
+        user: {
+          id: 1,
+          email: 'admin@idpb.com',
+          name: 'Administrador',
+          role: 'admin'
+        },
+        token: 'mock-jwt-token'
+      }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': req.headers.get('origin') || 'https://idpb.netlify.app',
+          'Access-Control-Allow-Credentials': 'true'
+        }
+      });
+    } else {
       return new Response(JSON.stringify({ error: 'Credenciais inválidas' }), {
         status: 401,
         headers: {
@@ -59,32 +70,6 @@ export default async (req, context) => {
         }
       });
     }
-
-    // Gerar JWT
-    const token = jwt.sign(
-      { 
-        email,
-        role: email.includes('admin') ? 'admin' : email.includes('pastor') ? 'pastor' : 'secretario'
-      },
-      process.env.JWT_SECRET || 'fallback-secret-key',
-      { expiresIn: '24h' }
-    );
-
-    return new Response(JSON.stringify({
-      success: true,
-      token,
-      user: {
-        email,
-        role: email.includes('admin') ? 'admin' : email.includes('pastor') ? 'pastor' : 'secretario'
-      }
-    }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': req.headers.get('origin') || 'https://idpb.netlify.app',
-        'Access-Control-Allow-Credentials': 'true'
-      }
-    });
 
   } catch (error) {
     console.error('Login error:', error);
@@ -99,6 +84,6 @@ export default async (req, context) => {
   }
 };
 
-export const config: Config = {
+export const config = {
   path: "/api/login"
 };
