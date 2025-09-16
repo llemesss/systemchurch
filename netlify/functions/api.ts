@@ -21,7 +21,14 @@ dotenv.config();
 const app = express();
 
 // Configurações de CORS e Middlewares
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['https://idpb.netlify.app', 'http://localhost:5173', 'http://localhost:5174'];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(express.json());
 
 // CONECTA À BASE DE DADOS APENAS UMA VEZ!
