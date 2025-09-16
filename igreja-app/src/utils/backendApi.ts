@@ -1,8 +1,8 @@
-// Utilitários para comunicação com o backend via Netlify Functions
+// Utilitários para comunicação com o backend via Express Server
 // Substitui completamente o Supabase
 
 // Configuração da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/.netlify/functions';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Função para obter o token JWT do localStorage
 function getAuthToken(): string | null {
@@ -94,7 +94,7 @@ export interface BackendUserProfile {
 // Autenticação
 export const authBackend = {
   async login(email: string, password: string) {
-    const response = await apiCall('/login', {
+    const response = await apiCall('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });

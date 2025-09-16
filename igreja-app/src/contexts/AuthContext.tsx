@@ -5,7 +5,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // API Helper functions - usando apenas backend próprio
 const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
   
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',

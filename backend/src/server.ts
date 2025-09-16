@@ -42,13 +42,14 @@ app.use('/api/prayer-requests', prayerRequestRoutes);
 app.get('/api/health', async (req, res) => {
   try {
     const db = getDatabase();
-    await db.query('SELECT NOW()');
+    // Usar all() sem parâmetros para SQLite
+    await db.all("SELECT datetime('now') as current_time", []);
     res.json({ 
       status: 'OK', 
       message: 'Servidor funcionando',
       database: 'Connected',
       environment: process.env.NODE_ENV || 'development',
-      databaseType: 'PostgreSQL',
+      databaseType: 'SQLite',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
