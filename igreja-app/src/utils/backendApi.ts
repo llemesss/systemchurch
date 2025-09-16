@@ -2,7 +2,7 @@
 // Substitui completamente o Supabase
 
 // Configuração da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/.netlify/functions/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/.netlify/functions';
 
 // Função para obter o token JWT do localStorage
 function getAuthToken(): string | null {
@@ -94,7 +94,7 @@ export interface BackendUserProfile {
 // Autenticação
 export const authBackend = {
   async login(email: string, password: string) {
-    const response = await apiCall('/api/auth/login', {
+    const response = await apiCall('/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -114,7 +114,7 @@ export const authBackend = {
     role?: string;
     cell_id?: number;
   }) {
-    const response = await apiCall('/api/auth/register', {
+    const response = await apiCall('/register', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
@@ -127,7 +127,7 @@ export const authBackend = {
   },
 
   async getCurrentUser() {
-    return await apiCall('/api/auth/me');
+    return await apiCall('/me');
   },
 
   async logout() {
@@ -185,39 +185,39 @@ export const usersBackend = {
 // Células
 export const cellsBackend = {
   async getAll(): Promise<BackendCell[]> {
-    return await apiCall('/api/cells');
+    return await apiCall('/cells');
   },
 
   async getPublic(): Promise<BackendCell[]> {
-    return await apiCall('/api/cells/public');
+    return await apiCall('/cells-public');
   },
 
   async getById(id: number): Promise<BackendCell> {
-    return await apiCall(`/api/cells/${id}`);
+    return await apiCall(`/cells/${id}`);
   },
 
   async create(cellData: Partial<BackendCell>) {
-    return await apiCall('/api/cells', {
+    return await apiCall('/cells', {
       method: 'POST',
       body: JSON.stringify(cellData),
     });
   },
 
   async update(id: number, cellData: Partial<BackendCell>) {
-    return await apiCall(`/api/cells/${id}`, {
+    return await apiCall(`/cells/${id}`, {
       method: 'PUT',
       body: JSON.stringify(cellData),
     });
   },
 
   async delete(id: number) {
-    return await apiCall(`/api/cells/${id}`, {
+    return await apiCall(`/cells/${id}`, {
       method: 'DELETE',
     });
   },
 
   async getMembers(id: number) {
-    return await apiCall(`/api/cells/${id}/members`);
+    return await apiCall(`/cells/${id}/members`);
   }
 };
 
@@ -298,7 +298,7 @@ export const userCellsBackend = {
 // Health check
 export const healthBackend = {
   async check() {
-    return await apiCall('/api/health');
+    return await apiCall('/health');
   }
 };
 

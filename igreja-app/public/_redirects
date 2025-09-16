@@ -1,5 +1,7 @@
-# Redirecionamentos para Netlify Functions
-/api/*  /.netlify/functions/api/:splat  200
+# Redirecionamentos para Netlify Functions individuais
+/api/health  /.netlify/functions/health  200
+/api/login   /.netlify/functions/login   200
+/api/cells/public  /.netlify/functions/cells-public  200
 
 # Redirecionamento para SPA (Single Page Application)
 /*    /index.html   200
