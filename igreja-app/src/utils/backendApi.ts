@@ -2,7 +2,10 @@
 // Substitui completamente o Supabase
 
 // Configuração da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const IS_NETLIFY = import.meta.env.VITE_API_URL?.includes('netlify.app');
+const API_BASE_URL = IS_NETLIFY 
+  ? import.meta.env.VITE_API_URL  // Para Netlify: https://site.netlify.app
+  : 'http://localhost:3001/api';  // Para desenvolvimento local
 
 // Função para obter o token JWT do localStorage
 function getAuthToken(): string | null {
@@ -13,6 +16,11 @@ function getAuthToken(): string | null {
 async function apiCall(endpoint: string, options: RequestInit = {}): Promise<any> {
   const token = getAuthToken();
   
+  // Para Netlify, usar endpoints diretos das funções
+  const finalEndpoint = IS_NETLIFY 
+    ? `/api${endpoint}`  // Netlify redirects: /api/* -> /.netlify/functions/*
+    : endpoint;          // Desenvolvimento local: usar endpoint direto
+  
   const config: RequestInit = {
     ...options,
     headers: {
@@ -22,7 +30,7 @@ async function apiCall(endpoint: string, options: RequestInit = {}): Promise<any
     },
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+  const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, config);
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
@@ -94,7 +102,9 @@ export interface BackendUserProfile {
 // Autenticação
 export const authBackend = {
   async login(email: string, password: string) {
-    const response = await apiCall('/auth/login', {
+    // Para Netlify, usar endpoint direto da função
+    const endpoint = IS_NETLIFY ? '/login' : '/auth/login';
+    const response = await apiCall(endpoint, {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });

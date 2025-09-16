@@ -96,7 +96,11 @@ export const CelulaProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   React.useEffect(() => {
     const loadPublicCells = async () => {
       try {
-        const cellsData = await apiCall('/cells/public');
+        // Para Netlify, usar endpoint direto da função cells-public
+        const endpoint = import.meta.env.VITE_API_URL?.includes('netlify.app') 
+          ? '/cells/public'  // Netlify function redirect
+          : '/cells/public'; // Desenvolvimento local
+        const cellsData = await apiCall(endpoint);
         const publicCells: Cell[] = cellsData.map((cell: any) => ({
           id: cell.id,
           cell_number: cell.cell_number || cell.name,
