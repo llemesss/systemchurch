@@ -1,3 +1,5 @@
+import { Config } from "@netlify/functions";
+
 export default async (req, context) => {
   // Verificar se é uma requisição OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
@@ -21,4 +23,8 @@ export default async (req, context) => {
       'Access-Control-Allow-Credentials': 'true'
     }
   });
+};
+
+export const config: Config = {
+  path: "/api/health"
 };

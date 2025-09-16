@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { Config } from "@netlify/functions";
 
 export default async (req, context) => {
   // Verificar se é uma requisição OPTIONS (preflight)
@@ -96,4 +97,8 @@ export default async (req, context) => {
       }
     });
   }
+};
+
+export const config: Config = {
+  path: "/api/login"
 };
