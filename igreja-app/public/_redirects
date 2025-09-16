@@ -3,5 +3,5 @@
 /api/login   /.netlify/functions/login   200
 /api/cells/public  /.netlify/functions/cells-public  200
 
-# Redirecionamento para SPA (Single Page Application)
+# Redirecionamento para SPA (Single Page Application) - DEVE SER O ÚLTIMO
 /*    /index.html   200
