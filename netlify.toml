@@ -6,7 +6,10 @@
   command = "npm run build"
   
   # Diretório de saída
-  publish = "dist"
+  publish = "igreja-app/dist"
+  
+  # Functions directory
+  functions = "netlify/functions"
   
   # Instalar dependências
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ."
@@ -43,6 +46,16 @@
 # Configurações das Functions (Backend)
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
+  
+# Configurações específicas para functions individuais
+[functions."health"]
+  node_bundler = "esbuild"
+  
+[functions."login"]
+  node_bundler = "esbuild"
+  
+[functions."cells-public"]
   node_bundler = "esbuild"
 
 # Configurações de desenvolvimento
