@@ -1,5 +1,3 @@
-import { Config } from "@netlify/functions";
-
 export default async (req, context) => {
   // Verificar se é uma requisição OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
@@ -82,8 +80,4 @@ export default async (req, context) => {
       }
     });
   }
-};
-
-export const config = {
-  path: "/api/login"
 };
