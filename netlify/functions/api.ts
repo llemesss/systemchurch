@@ -5,7 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import serverless from 'serverless-http';
-import { connectDatabase } from '../../backend/src/database/database'; // Caminho corrigido
+import { connectDatabase, getDatabase } from '../../backend/src/database/database'; // Caminho corrigido
 
 // Importação das suas rotas
 import authRoutes from '../../backend/src/routes/auth';
@@ -33,6 +33,26 @@ app.use(express.json());
 
 // CONECTA À BASE DE DADOS APENAS UMA VEZ!
 connectDatabase(); 
+
+// Rota de health check
+app.get('/api/health', async (req, res) => {
+  try {
+    const db = getDatabase();
+    res.json({ 
+      status: 'OK', 
+      message: 'Netlify Functions funcionando',
+      environment: process.env.NODE_ENV || 'production',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Erro no health check:', error);
+    res.status(500).json({ 
+      status: 'ERROR', 
+      message: 'Erro no servidor',
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    });
+  }
+});
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
