@@ -18,12 +18,7 @@
   NODE_VERSION = "18"
   NPM_VERSION = "9"
 
-# Configurações para SPA (Single Page Application) - EXCETO para as functions
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
+# Configurações para SPA (Single Page Application)
 [[redirects]]
   from = "/*"
   to = "/index.html"
