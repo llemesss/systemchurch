@@ -9,9 +9,10 @@ import {
 } from './backendApi';
 
 // Base URL para chamadas ao backend
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://igreja-backend.onrender.com'
-  : 'http://localhost:3001';
+const IS_NETLIFY = import.meta.env.VITE_API_URL?.includes('netlify.app');
+const API_BASE_URL = IS_NETLIFY 
+  ? import.meta.env.VITE_API_URL  // Para Netlify: https://site.netlify.app
+  : 'http://localhost:3001';      // Para desenvolvimento local
 
 // Função para fazer chamadas HTTP reais ao backend (para endpoints que precisam de autenticação JWT)
 export const apiCallAuth = async (endpoint: string, options: RequestInit = {}) => {
@@ -23,7 +24,12 @@ export const apiCallAuth = async (endpoint: string, options: RequestInit = {}) =
       throw new Error('Token de autenticação não encontrado');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
+    // Para Netlify, usar endpoints diretos das funções
+    const finalEndpoint = IS_NETLIFY 
+      ? endpoint  // Netlify: endpoint direto
+      : `/api${endpoint}`;  // Local: com prefixo /api
+
+    const response = await fetch(`${API_BASE_URL}${finalEndpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
